@@ -6,9 +6,14 @@ type StatusType =
   | "pending" 
   | "pending_dept"
   | "pending_senior"
+  | "pending_approval"   // ✅ ADD
   | "approved"
   | "approved_inventory"
   | "approved_purchase"
+  | "issued"               // ✅ ADD
+  | "received"           // ✅ ADD
+  | "closed"             // ✅ ADD
+  | "cancelled"          // ✅ ADD
   | "rejected" 
   | "completed" 
   | "paid"
@@ -114,6 +119,30 @@ const statusConfig: Record<StatusType, { label: string; className: string }> = {
     label: "Discrepancy", 
     className: "bg-destructive/10 text-destructive hover:bg-destructive/20" 
   },
+  pending_approval: {
+  label: "Pending Approval",
+  className: "bg-warning/10 text-warning hover:bg-warning/20",
+},
+
+issued: {
+  label: "Sent to Vendor",
+  className: "bg-primary/10 text-primary hover:bg-primary/20",
+},
+
+received: {
+  label: "Received",
+  className: "bg-success/10 text-success hover:bg-success/20",
+},
+
+closed: {
+  label: "Closed",
+  className: "bg-muted text-muted-foreground hover:bg-muted",
+},
+
+cancelled: {
+  label: "Cancelled",
+  className: "bg-destructive/10 text-destructive hover:bg-destructive/20",
+},
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

@@ -22,7 +22,7 @@ const recentRequisitions = [
 
 const pendingApprovals = [
   { id: "PO-001", type: "Purchase Order", amount: "₨45,000", requester: "Azlaan Kareem" },
-  { id: "PAY-001", type: "Pay Order", amount: "₨32,500", requester: "Jane Smith" },
+  { id: "PAY-001", type: "Pay Order", amount: "₨32,500", requester: "Kareem Ullah" },
 ];
 
 export default function Dashboard() {

@@ -153,7 +153,35 @@ const pendingRequestsData: PendingRequest[] = [
     justification: "Replacement for failed compressor unit"
   },
 ];
+const requestHistory = [
+  {
+    requesterEmail: "ahmed.hassan@company.com",
+    itemDescription: "Diesel Fuel for Terminal Vehicles",
+    requestDate: "2025-01-20",
+  },
+];
+const checkAbnormalPattern = (request: PendingRequest) => {
+  const daysLimit = 20;
 
+const today = new Date(request.requestDate);
+
+  const found = requestHistory.find((history) => {
+    const historyDate = new Date(history.requestDate);
+
+    const diffTime = today.getTime() - historyDate.getTime();
+    const diffDays = diffTime / (1000 * 3600 * 24);
+
+    return (
+      history.requesterEmail === request.requesterEmail &&
+      request.itemDescription
+  .toLowerCase()
+  .includes(history.itemDescription.toLowerCase()) &&
+      diffDays <= daysLimit
+    );
+  });
+
+  return found;
+};
 // Mock inventory data
 const inventoryData: InventoryItem[] = [
   { itemName: "Diesel Fuel", category: "Fuel & Lubricants", availableQty: 2000, unit: "L", warehouse: "Ops Warehouse" },
@@ -194,13 +222,24 @@ export default function DepartmentApproval() {
     setBudgetCheck(budget || null);
   };
 
-  const openReviewDialog = (request: PendingRequest) => {
-    setSelectedRequest(request);
-    setRejectionReason("");
-    checkInventory(request);
-    checkBudget(request);
-    setIsReviewDialogOpen(true);
-  };
+const openReviewDialog = (request: PendingRequest) => {
+  setSelectedRequest(request);
+  setRejectionReason("");
+  checkInventory(request);
+  checkBudget(request);
+
+  const abnormal = checkAbnormalPattern(request);
+
+  if (abnormal) {
+    toast({
+      title: "⚠ Abnormal Request Pattern Detected",
+      description: `This user requested the same item within last 20 days.`,
+      variant: "destructive",
+    });
+  }
+
+  setIsReviewDialogOpen(true);
+};
 
   const handleApproveFromInventory = () => {
     if (!selectedRequest) return;
@@ -493,7 +532,6 @@ export default function DepartmentApproval() {
                 )}
               </div>
 
-              {/* Budget Check */}
               <div className="border rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Banknote className="w-5 h-5 text-primary" />

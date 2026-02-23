@@ -199,7 +199,18 @@ export function AppSidebar() {
         </SidebarGroup>
 
       </SidebarContent>
-
+      <SidebarFooter className="p-4 border-t border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center">
+            <span className="text-sm font-medium text-sidebar-foreground">JD</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-sidebar-foreground">Mariam Ilyas</p>
+            <p className="text-xs text-sidebar-foreground/60">Procurement Officer</p>
+          </div>
+          <Settings className="w-5 h-5 text-sidebar-foreground/60 cursor-pointer hover:text-sidebar-foreground" />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

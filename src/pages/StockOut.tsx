@@ -40,10 +40,10 @@ interface StockOutEntry {
 
 const stockOutData: StockOutEntry[] = [
   { id: "1", issueNumber: "ISS-2025-001", item: "Diesel Fuel", quantity: 500, unit: "L", costOfGoods: "₨600", issuedTo: "Generator-100kVA-01", issueType: "asset", issueDate: "2025-01-28", issuedBy: "Azlaan Kareem" },
-  { id: "2", issueNumber: "ISS-2025-002", item: "Petrol", quantity: 100, unit: "L", costOfGoods: "₨135", issuedTo: "Forklift-01", issueType: "asset", issueDate: "2025-01-27", issuedBy: "Jane Smith" },
+  { id: "2", issueNumber: "ISS-2025-002", item: "Petrol", quantity: 100, unit: "L", costOfGoods: "₨135", issuedTo: "Forklift-01", issueType: "asset", issueDate: "2025-01-27", issuedBy: "Kareem Ullah" },
   { id: "3", issueNumber: "ISS-2025-003", item: "Engine Oil SAE 40", quantity: 10, unit: "L", costOfGoods: "₨85", issuedTo: "Maintenance Dept", issueType: "manual", issueDate: "2025-01-26", issuedBy: "Mikaal Ahmed" },
   { id: "4", issueNumber: "ADJ-2025-001", item: "Lubricant Grease", quantity: 2, unit: "KG", costOfGoods: "₨50", issuedTo: "Damaged Stock", issueType: "adjustment", issueDate: "2025-01-25", issuedBy: "Tehseen Alam", reason: "Damaged during storage" },
-  { id: "5", issueNumber: "TRF-2025-001", item: "Diesel Fuel", quantity: 1000, unit: "L", costOfGoods: "₨1,200", issuedTo: "Terminal B", issueType: "transfer", issueDate: "2025-01-24", issuedBy: "Sarah Brown" },
+  { id: "5", issueNumber: "TRF-2025-001", item: "Diesel Fuel", quantity: 1000, unit: "L", costOfGoods: "₨1,200", issuedTo: "Terminal B", issueType: "transfer", issueDate: "2025-01-24", issuedBy: "Sarah" },
 ];
 
 export default function StockOut() {

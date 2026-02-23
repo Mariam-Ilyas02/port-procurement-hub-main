@@ -34,8 +34,12 @@ interface Requisition {
   requestNumber: string;
   item: string;
   category: string;
+  subcategory: string;
+  unit: string;
   quantity: string;
-  estimatedCost: string;
+  // estimatedCost: number;
+  totalEstimatedCost: number;
+  justification: string;
   requiredDate: string;
   requester: string;
   department: string;
@@ -53,13 +57,126 @@ interface Requisition {
 const SENIOR_APPROVAL_THRESHOLD = 10000;
 
 const requisitionsData: Requisition[] = [
-  { id: "1", requestNumber: "REQ-2025-001", item: "Diesel Fuel", category: "Fuel", quantity: "5000 L", estimatedCost: "₨15,000", requiredDate: "2025-02-15", requester: "Azlaan Kareem", department: "Operations", status: "pending_senior", inventoryAvailable: true, inventoryQuantity: 15000, budgetStatus: "within", approvalType: "pending", approvalLevel: "senior_management", createdAt: "2025-01-28", notificationSent: true },
-  { id: "2", requestNumber: "REQ-2025-002", item: "Engine Oil SAE 40", category: "Oil", quantity: "200 L", estimatedCost: "₨3,500", requiredDate: "2025-02-10", requester: "Jane Smith", department: "Workshop", status: "approved", inventoryAvailable: true, inventoryQuantity: 200, budgetStatus: "within", approvalType: "inventory", approvalLevel: "dept_manager", createdAt: "2025-01-27", notificationSent: true },
-  { id: "3", requestNumber: "REQ-2025-003", item: "Office Stationery", category: "Stationary", quantity: "100 Pcs", estimatedCost: "₨500", requiredDate: "2025-02-05", requester: "Mikaal Ahmed", department: "Admin", status: "draft", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "pending", approvalType: "pending", approvalLevel: "none", createdAt: "2025-01-26", notificationSent: false },
-  { id: "4", requestNumber: "REQ-2025-004", item: "Safety Helmets", category: "Safety", quantity: "50 Pcs", estimatedCost: "₨12,000", requiredDate: "2025-02-20", requester: "Sarah Brown", department: "Operations", status: "rejected", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "exceeds", approvalType: "purchase", approvalLevel: "senior_management", createdAt: "2025-01-25", notificationSent: true },
-  { id: "5", requestNumber: "REQ-2025-005", item: "Petrol", category: "Fuel", quantity: "2000 L", estimatedCost: "₨6,000", requiredDate: "2025-02-12", requester: "Azlaan Kareem", department: "Operations", status: "approved", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "within", approvalType: "purchase", approvalLevel: "dept_manager", createdAt: "2025-01-24", notificationSent: true },
-  { id: "6", requestNumber: "REQ-2025-006", item: "Hydraulic Oil", category: "Oil", quantity: "100 L", estimatedCost: "₨2,800", requiredDate: "2025-02-18", requester: "Tehseen Alam", department: "Workshop", status: "fulfilled", inventoryAvailable: true, inventoryQuantity: 50, budgetStatus: "within", approvalType: "inventory", approvalLevel: "dept_manager", createdAt: "2025-01-23", notificationSent: true },
+  {
+    id: "1",
+    requestNumber: "REQ-2026-001",
+    item: "Diesel Fuel",
+    category: "Fuel",
+    subcategory: "Bulk Fuel",
+    unit: "L",
+    quantity: "5000",
+    totalEstimatedCost: 15000,
+    justification: "Required for monthly port machinery operations",
+    requiredDate: "2026-03-01",
+    requester: "Azlaan Kareem",
+    department: "Operations",
+    status: "pending_senior",
+    inventoryAvailable: true,
+    inventoryQuantity: 15000,
+    budgetStatus: "within",
+    approvalType: "inventory",
+    approvalLevel: "senior_management",
+    createdAt: "2026-02-20",
+    notificationSent: true,
+  },
+  {
+    id: "2",
+    requestNumber: "REQ-2026-002",
+    item: "Engine Oil SAE 40",
+    category: "Oil",
+    subcategory: "Lubricants",
+    unit: "L",
+    quantity: "200",
+    totalEstimatedCost: 3500,
+    justification: "Routine maintenance",
+    requiredDate: "2026-03-05",
+    requester: "Kareem Ullah",
+    department: "Workshop",
+    status: "approved",
+    inventoryAvailable: true,
+    inventoryQuantity: 200,
+    budgetStatus: "within",
+    approvalType: "inventory",
+    approvalLevel: "dept_manager",
+    createdAt: "2026-02-18",
+    notificationSent: true,
+  },
+  {
+    id: "3",
+    requestNumber: "REQ-2026-003",
+    item: "Office Stationery",
+    category: "Stationary",
+    subcategory: "Office Supplies",
+    unit: "Pcs",
+    quantity: "100",
+    totalEstimatedCost: 500,
+    justification: "Admin office usage",
+    requiredDate: "2026-03-10",
+    requester: "Mikaal Ahmed",
+    department: "Admin",
+    status: "draft",
+    inventoryAvailable: false,
+    inventoryQuantity: 0,
+    budgetStatus: "pending",
+    approvalType: "pending",
+    approvalLevel: "none",
+    createdAt: "2026-02-15",
+    notificationSent: false,
+  },
+  {
+    id: "4",
+    requestNumber: "REQ-2026-004",
+    item: "Safety Helmets",
+    category: "Safety",
+    subcategory: "PPE",
+    unit: "Pcs",
+    quantity: "50",
+    totalEstimatedCost: 12000,
+    justification: "New staff safety compliance",
+    requiredDate: "2026-03-12",
+    requester: "Sarah Brown",
+    department: "Operations",
+    status: "rejected",
+    inventoryAvailable: false,
+    inventoryQuantity: 0,
+    budgetStatus: "exceeds",
+    approvalType: "purchase",
+    approvalLevel: "senior_management",
+    createdAt: "2026-02-14",
+    notificationSent: true,
+  },
+  {
+    id: "5",
+    requestNumber: "REQ-2026-005",
+    item: "Hydraulic Oil",
+    category: "Oil",
+    subcategory: "Lubricants",
+    unit: "L",
+    quantity: "100",
+    totalEstimatedCost: 2800,
+    justification: "Crane maintenance",
+    requiredDate: "2026-03-15",
+    requester: "Tehseen Alam",
+    department: "Workshop",
+    status: "fulfilled",
+    inventoryAvailable: true,
+    inventoryQuantity: 50,
+    budgetStatus: "within",
+    approvalType: "inventory",
+    approvalLevel: "dept_manager",
+    createdAt: "2026-02-10",
+    notificationSent: true,
+  },
 ];
+
+// const requisitionsData: Requisition[] = [
+//   { id: "1", requestNumber: "REQ-2025-001", item: "Diesel Fuel", category: "Fuel", quantity: "5000 L", estimatedCost: "₨15,000", requiredDate: "2025-02-15", requester: "Azlaan Kareem", department: "Operations", status: "pending_senior", inventoryAvailable: true, inventoryQuantity: 15000, budgetStatus: "within", approvalType: "pending", approvalLevel: "senior_management", createdAt: "2025-01-28", notificationSent: true },
+//   { id: "2", requestNumber: "REQ-2025-002", item: "Engine Oil SAE 40", category: "Oil", quantity: "200 L", estimatedCost: "₨3,500", requiredDate: "2025-02-10", requester: "Jane Smith", department: "Workshop", status: "approved", inventoryAvailable: true, inventoryQuantity: 200, budgetStatus: "within", approvalType: "inventory", approvalLevel: "dept_manager", createdAt: "2025-01-27", notificationSent: true },
+//   { id: "3", requestNumber: "REQ-2025-003", item: "Office Stationery", category: "Stationary", quantity: "100 Pcs", estimatedCost: "₨500", requiredDate: "2025-02-05", requester: "Mikaal Ahmed", department: "Admin", status: "draft", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "pending", approvalType: "pending", approvalLevel: "none", createdAt: "2025-01-26", notificationSent: false },
+//   { id: "4", requestNumber: "REQ-2025-004", item: "Safety Helmets", category: "Safety", quantity: "50 Pcs", estimatedCost: "₨12,000", requiredDate: "2025-02-20", requester: "Sarah Brown", department: "Operations", status: "rejected", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "exceeds", approvalType: "purchase", approvalLevel: "senior_management", createdAt: "2025-01-25", notificationSent: true },
+//   { id: "5", requestNumber: "REQ-2025-005", item: "Petrol", category: "Fuel", quantity: "2000 L", estimatedCost: "₨6,000", requiredDate: "2025-02-12", requester: "Azlaan Kareem", department: "Operations", status: "approved", inventoryAvailable: false, inventoryQuantity: 0, budgetStatus: "within", approvalType: "purchase", approvalLevel: "dept_manager", createdAt: "2025-01-24", notificationSent: true },
+//   { id: "6", requestNumber: "REQ-2025-006", item: "Hydraulic Oil", category: "Oil", quantity: "100 L", estimatedCost: "₨2,800", requiredDate: "2025-02-18", requester: "Tehseen Alam", department: "Workshop", status: "fulfilled", inventoryAvailable: true, inventoryQuantity: 50, budgetStatus: "within", approvalType: "inventory", approvalLevel: "dept_manager", createdAt: "2025-01-23", notificationSent: true },
+// ];
 
 // Mock inventory data for availability check
 const inventoryStock = {
