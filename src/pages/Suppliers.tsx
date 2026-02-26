@@ -37,7 +37,13 @@ interface SupplierItem {
   category: string;
   unit: string;
 }
-
+interface PerformanceMetrics {
+  onTimeDelivery: number; // percentage
+  qualityRating: number; // 1-5
+  responseTime: number; // hours
+  complaintCount: number;
+  lastEvaluation: string; // date
+}
 interface Supplier {
   id: string;
   code: string;
@@ -455,7 +461,7 @@ export default function Suppliers() {
                   </Button>
                 </div>
               </TabsContent>
-
+             
               <TabsContent value="items">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -489,6 +495,119 @@ export default function Suppliers() {
                   )}
                 </div>
               </TabsContent>
+
+              <TabsContent value="performance" className="space-y-4">
+  {/* Performance Metrics Card */}
+  <Card className="p-4">
+    <h4 className="font-medium mb-3">Performance Metrics</h4>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <p className="text-sm text-muted-foreground">On-Time Delivery</p>
+        <p className="text-2xl font-bold text-success">98%</p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">Quality Rating</p>
+        <p className="text-2xl font-bold text-warning">4.5/5</p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">Avg Response Time</p>
+        <p className="text-2xl font-bold">4 hrs</p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">Complaints</p>
+        <p className="text-2xl font-bold text-destructive">2</p>
+      </div>
+    </div>
+  </Card>
+  
+  {/* Spend Analysis Card */}
+  <Card className="p-4">
+    <h4 className="font-medium mb-3">Spend Analysis</h4>
+    <div className="space-y-2">
+      <div className="flex justify-between">
+        <span>Total Spend (YTD)</span>
+        <span className="font-medium">₨12.5M</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Average Order Value</span>
+        <span className="font-medium">₨278K</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Last Order Date</span>
+        <span className="font-medium">2025-01-28</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Total Orders</span>
+        <span className="font-medium">45</span>
+      </div>
+    </div>
+  </Card>
+
+  {/* Recent Performance Chart (Optional) */}
+  <Card className="p-4">
+    <h4 className="font-medium mb-3">Delivery Performance Trend</h4>
+    <div className="h-32 flex items-end justify-between gap-2">
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full bg-success/20 rounded-t h-16" style={{ height: '64px' }}></div>
+        <span className="text-xs mt-1">Jan</span>
+      </div>
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full bg-success/20 rounded-t h-20" style={{ height: '80px' }}></div>
+        <span className="text-xs mt-1">Feb</span>
+      </div>
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full bg-success/20 rounded-t h-24" style={{ height: '96px' }}></div>
+        <span className="text-xs mt-1">Mar</span>
+      </div>
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full bg-success/20 rounded-t h-28" style={{ height: '112px' }}></div>
+        <span className="text-xs mt-1">Apr</span>
+      </div>
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full bg-success/20 rounded-t h-32" style={{ height: '128px' }}></div>
+        <span className="text-xs mt-1">May</span>
+      </div>
+    </div>
+    <div className="flex justify-between text-xs text-muted-foreground mt-2">
+      <span>On-Time Delivery: 98%</span>
+      <span>Target: 95%</span>
+    </div>
+  </Card>
+
+  {/* Performance Rating History */}
+  <Card className="p-4">
+    <h4 className="font-medium mb-3">Rating History</h4>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Q1 2025</span>
+        <div className="flex items-center gap-1">
+          {[1,2,3,4,5].map((star) => (
+            <span key={star} className={`text-lg ${star <= 4 ? 'text-warning' : 'text-muted'}`}>★</span>
+          ))}
+          <span className="text-sm ml-2">4.0</span>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Q4 2024</span>
+        <div className="flex items-center gap-1">
+          {[1,2,3,4,5].map((star) => (
+            <span key={star} className={`text-lg ${star <= 4.5 ? 'text-warning' : 'text-muted'}`}>★</span>
+          ))}
+          <span className="text-sm ml-2">4.5</span>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Q3 2024</span>
+        <div className="flex items-center gap-1">
+          {[1,2,3,4,5].map((star) => (
+            <span key={star} className={`text-lg ${star <= 4.2 ? 'text-warning' : 'text-muted'}`}>★</span>
+          ))}
+          <span className="text-sm ml-2">4.2</span>
+        </div>
+      </div>
+    </div>
+  </Card>
+</TabsContent>
             </Tabs>
           )}
         </DialogContent>

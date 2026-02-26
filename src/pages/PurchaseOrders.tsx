@@ -284,9 +284,6 @@ import {
   Plus,
 } from "lucide-react";
 
-/* ============================= */
-/*         TYPES                 */
-/* ============================= */
 
 interface PurchaseOrder {
   id: string;

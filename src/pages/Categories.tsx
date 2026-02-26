@@ -34,6 +34,7 @@ const initialCategories: Category[] = [
     budgetLimit: 50000,
     status: "Active",
   },
+  
   {
     id: "2",
     name: "Oil",

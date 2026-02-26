@@ -24,7 +24,7 @@ type StatusType =
   | "high"
   | "active"
   | "inactive"
-  | "fulfilled"
+  | "PO Created"
   | "maintenance"
   | "verified"
   | "discrepancy";
@@ -103,8 +103,8 @@ const statusConfig: Record<StatusType, { label: string; className: string }> = {
     label: "Inactive", 
     className: "bg-muted text-muted-foreground hover:bg-muted" 
   },
-  fulfilled: { 
-    label: "Fulfilled", 
+  "PO Created": { 
+    label: "PO Created", 
     className: "bg-primary/10 text-primary hover:bg-primary/20" 
   },
   maintenance: { 

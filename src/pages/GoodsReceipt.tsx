@@ -330,6 +330,32 @@ export default function GoodsReceipt() {
                 </div>
               </div>
 
+
+<div className="p-3 bg-success/10 rounded-lg border border-success/20">
+  <p className="text-sm font-medium text-success mb-2">FIFO Layer Information</p>
+  <div className="grid grid-cols-2 gap-2 text-xs">
+    <div>
+      <span className="text-muted-foreground">Batch Number:</span>
+      <span className="ml-2 font-mono">BATCH-{Date.now().toString().slice(-6)}</span>
+    </div>
+    <div>
+      <span className="text-muted-foreground">Receipt Date:</span>
+      <span className="ml-2">{new Date().toLocaleDateString()}</span>
+    </div>
+    <div>
+      <span className="text-muted-foreground">Unit Cost:</span>
+      <span className="ml-2 font-medium">₨<span id="unitCost">0.00</span></span>
+    </div>
+    <div>
+      <span className="text-muted-foreground">FIFO Layer:</span>
+      <span className="ml-2 bg-success/10 text-success px-2 py-0.5 rounded-full">New Layer</span>
+    </div>
+  </div>
+  <p className="text-xs text-muted-foreground mt-2">
+    This receipt creates a new FIFO cost layer. Future issuances will consume from this batch first.
+  </p>
+</div>
+
               <div className="col-span-2 space-y-2">
                 <Label>Remarks / Discrepancy Notes</Label>
                 <Textarea placeholder="Note any discrepancies, damages, or issues..." rows={2} />

@@ -32,6 +32,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Import the new ApprovalWorkflow component
+import { ApprovalWorkflow } from "@/components/shared/ApprovalWorkflow";
+
 interface PendingRequest {
   id: string;
   reqNumber: string;
@@ -48,6 +51,16 @@ interface PendingRequest {
   requiredDate: string;
   status: "pending_dept" | "approved_inventory" | "approved_purchase" | "rejected";
   justification: string;
+  approvalStep?: number; // Track current approval step
+  approvalSteps?: ApprovalStep[]; // Track approval history
+}
+
+interface ApprovalStep {
+  level: string;
+  approver: string;
+  status: "pending" | "approved" | "rejected";
+  date?: string;
+  comments?: string;
 }
 
 interface InventoryItem {
@@ -65,7 +78,7 @@ interface CategoryBudget {
   remainingBudget: number;
 }
 
-// Mock data for pending requests
+// Mock data for pending requests with approval steps
 const pendingRequestsData: PendingRequest[] = [
   { 
     id: "1", 
@@ -82,7 +95,13 @@ const pendingRequestsData: PendingRequest[] = [
     requestDate: "2025-01-28",
     requiredDate: "2025-02-01",
     status: "pending_dept",
-    justification: "Required for daily terminal operations"
+    justification: "Required for daily terminal operations",
+    approvalStep: 0,
+    approvalSteps: [
+      { level: "Department Approval", approver: "Omar Farooq", status: "pending" },
+      { level: "Budget Review", approver: "Fatima Zahra", status: "pending" },
+      { level: "Final Approval", approver: "Usman Ali", status: "pending" }
+    ]
   },
   { 
     id: "2", 
@@ -99,7 +118,13 @@ const pendingRequestsData: PendingRequest[] = [
     requestDate: "2025-01-27",
     requiredDate: "2025-02-03",
     status: "pending_dept",
-    justification: "Scheduled maintenance for Generator #3"
+    justification: "Scheduled maintenance for Generator #3",
+    approvalStep: 1,
+    approvalSteps: [
+      { level: "Department Approval", approver: "Omar Farooq", status: "approved", date: "2025-01-28", comments: "Approved within budget" },
+      { level: "Budget Review", approver: "Fatima Zahra", status: "pending" },
+      { level: "Final Approval", approver: "Usman Ali", status: "pending" }
+    ]
   },
   { 
     id: "3", 
@@ -116,7 +141,12 @@ const pendingRequestsData: PendingRequest[] = [
     requestDate: "2025-01-26",
     requiredDate: "2025-02-10",
     status: "pending_dept",
-    justification: "Running low on printer supplies"
+    justification: "Running low on printer supplies",
+    approvalStep: 0,
+    approvalSteps: [
+      { level: "Department Approval", approver: "Omar Farooq", status: "pending" },
+      { level: "Budget Review", approver: "Fatima Zahra", status: "pending" }
+    ]
   },
   { 
     id: "4", 
@@ -133,7 +163,12 @@ const pendingRequestsData: PendingRequest[] = [
     requestDate: "2025-01-25",
     requiredDate: "2025-02-05",
     status: "pending_dept",
-    justification: "Critical for crane hydraulic system"
+    justification: "Critical for crane hydraulic system",
+    approvalStep: 0,
+    approvalSteps: [
+      { level: "Department Approval", approver: "Omar Farooq", status: "pending" },
+      { level: "Budget Review", approver: "Fatima Zahra", status: "pending" }
+    ]
   },
   { 
     id: "5", 
@@ -150,9 +185,16 @@ const pendingRequestsData: PendingRequest[] = [
     requestDate: "2025-01-24",
     requiredDate: "2025-03-01",
     status: "pending_dept",
-    justification: "Replacement for failed compressor unit"
+    justification: "Replacement for failed compressor unit",
+    approvalStep: 0,
+    approvalSteps: [
+      { level: "Department Approval", approver: "Omar Farooq", status: "pending" },
+      { level: "Budget Review", approver: "Fatima Zahra", status: "pending" },
+      { level: "Senior Management", approver: "Khalid Usman", status: "pending" }
+    ]
   },
 ];
+
 const requestHistory = [
   {
     requesterEmail: "ahmed.hassan@company.com",
@@ -160,28 +202,26 @@ const requestHistory = [
     requestDate: "2025-01-20",
   },
 ];
+
 const checkAbnormalPattern = (request: PendingRequest) => {
   const daysLimit = 20;
-
-const today = new Date(request.requestDate);
+  const today = new Date(request.requestDate);
 
   const found = requestHistory.find((history) => {
     const historyDate = new Date(history.requestDate);
-
     const diffTime = today.getTime() - historyDate.getTime();
     const diffDays = diffTime / (1000 * 3600 * 24);
 
     return (
       history.requesterEmail === request.requesterEmail &&
-      request.itemDescription
-  .toLowerCase()
-  .includes(history.itemDescription.toLowerCase()) &&
+      request.itemDescription.toLowerCase().includes(history.itemDescription.toLowerCase()) &&
       diffDays <= daysLimit
     );
   });
 
   return found;
 };
+
 // Mock inventory data
 const inventoryData: InventoryItem[] = [
   { itemName: "Diesel Fuel", category: "Fuel & Lubricants", availableQty: 2000, unit: "L", warehouse: "Ops Warehouse" },
@@ -209,7 +249,6 @@ export default function DepartmentApproval() {
   const { toast } = useToast();
 
   const checkInventory = (request: PendingRequest) => {
-    // Check if item exists in inventory
     const found = inventoryData.find(item => 
       request.itemDescription.toLowerCase().includes(item.itemName.toLowerCase()) ||
       item.itemName.toLowerCase().includes(request.itemDescription.toLowerCase().split(" ")[0])
@@ -222,29 +261,71 @@ export default function DepartmentApproval() {
     setBudgetCheck(budget || null);
   };
 
-const openReviewDialog = (request: PendingRequest) => {
-  setSelectedRequest(request);
-  setRejectionReason("");
-  checkInventory(request);
-  checkBudget(request);
+  const openReviewDialog = (request: PendingRequest) => {
+    setSelectedRequest(request);
+    setRejectionReason("");
+    checkInventory(request);
+    checkBudget(request);
 
-  const abnormal = checkAbnormalPattern(request);
+    const abnormal = checkAbnormalPattern(request);
 
-  if (abnormal) {
+    if (abnormal) {
+      toast({
+        title: "⚠ Abnormal Request Pattern Detected",
+        description: `This user requested the same item within last 20 days.`,
+        variant: "destructive",
+      });
+    }
+
+    setIsReviewDialogOpen(true);
+  };
+
+  const handleApprove = (level: string, comments: string) => {
+    if (!selectedRequest) return;
+    
+    // Update the approval step
+    const updatedSteps = selectedRequest.approvalSteps?.map((step, index) => {
+      if (step.level === level) {
+        return { ...step, status: "approved" as const, date: new Date().toISOString().split('T')[0], comments };
+      }
+      return step;
+    });
+
+    const nextStep = (selectedRequest.approvalStep || 0) + 1;
+    
+    // Check if this was the last step
+    if (nextStep >= (selectedRequest.approvalSteps?.length || 0)) {
+      // Final approval - proceed with inventory or purchase
+      if (isInventoryAvailable) {
+        handleApproveFromInventory();
+      } else {
+        handleApproveForPurchase();
+      }
+    } else {
+      toast({
+        title: "Step Approved",
+        description: `Request moved to next approval level.`,
+      });
+      setIsReviewDialogOpen(false);
+    }
+  };
+
+  const handleReject = (level: string, comments: string) => {
+    if (!selectedRequest) return;
+    
     toast({
-      title: "⚠ Abnormal Request Pattern Detected",
-      description: `This user requested the same item within last 20 days.`,
+      title: "Request Rejected",
+      description: `Notification sent to ${selectedRequest.requester} with rejection reason.`,
       variant: "destructive",
     });
-  }
-
-  setIsReviewDialogOpen(true);
-};
+    
+    setIsReviewDialogOpen(false);
+    setSelectedRequest(null);
+  };
 
   const handleApproveFromInventory = () => {
     if (!selectedRequest) return;
     
-    // Send notification to requester
     toast({
       title: "Request Approved - From Inventory",
       description: `Notification sent to ${selectedRequest.requester} (${selectedRequest.requesterEmail}). Item will be issued from inventory.`,
@@ -257,7 +338,6 @@ const openReviewDialog = (request: PendingRequest) => {
   const handleApproveForPurchase = () => {
     if (!selectedRequest || !budgetCheck) return;
     
-    // Check budget before approving for purchase
     if (selectedRequest.estimatedCost > budgetCheck.remainingBudget) {
       toast({
         title: "Budget Exceeded",
@@ -267,7 +347,6 @@ const openReviewDialog = (request: PendingRequest) => {
       return;
     }
     
-    // Send notification to requester
     toast({
       title: "Request Approved - For Purchase",
       description: `Notification sent to ${selectedRequest.requester} (${selectedRequest.requesterEmail}). Request forwarded to Procurement.`,
@@ -275,28 +354,6 @@ const openReviewDialog = (request: PendingRequest) => {
     
     setIsReviewDialogOpen(false);
     setSelectedRequest(null);
-  };
-
-  const handleReject = () => {
-    if (!selectedRequest || !rejectionReason.trim()) {
-      toast({
-        title: "Rejection Reason Required",
-        description: "Please provide a reason for rejecting this request.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Send notification to requester with rejection reason
-    toast({
-      title: "Request Rejected",
-      description: `Notification sent to ${selectedRequest.requester} with rejection reason.`,
-      variant: "destructive",
-    });
-    
-    setIsReviewDialogOpen(false);
-    setSelectedRequest(null);
-    setRejectionReason("");
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -494,6 +551,21 @@ const openReviewDialog = (request: PendingRequest) => {
                 </div>
               </div>
 
+              {/* Approval Workflow - New Component */}
+              {selectedRequest.approvalSteps && (
+                <div className="border rounded-lg p-4">
+                  <ApprovalWorkflow
+                    requestId={selectedRequest.id}
+                    amount={selectedRequest.estimatedCost}
+                    department={selectedRequest.department}
+                    currentStep={selectedRequest.approvalStep || 0}
+                    steps={selectedRequest.approvalSteps}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
+                </div>
+              )}
+
               {/* Inventory Check */}
               <div className="border rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -532,6 +604,7 @@ const openReviewDialog = (request: PendingRequest) => {
                 )}
               </div>
 
+              {/* Budget Check */}
               <div className="border rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Banknote className="w-5 h-5 text-primary" />
@@ -579,20 +652,6 @@ const openReviewDialog = (request: PendingRequest) => {
                 )}
               </div>
 
-              {/* Rejection Reason */}
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <XCircle className="w-5 h-5 text-destructive" />
-                  <h4 className="font-semibold">Rejection Reason (Required if rejecting)</h4>
-                </div>
-                <Textarea
-                  placeholder="Enter the reason for rejection. This will be sent to the requester..."
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
               {/* Notification Info */}
               <div className="flex items-center gap-2 p-3 bg-info/10 text-info rounded-lg">
                 <Mail className="w-4 h-4" />
@@ -601,37 +660,10 @@ const openReviewDialog = (request: PendingRequest) => {
             </div>
           )}
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter>
             <Button variant="outline" onClick={() => setIsReviewDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleReject}
-              disabled={!rejectionReason.trim()}
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Reject Request
-            </Button>
-            {isInventoryAvailable ? (
-              <Button 
-                variant="default"
-                onClick={handleApproveFromInventory}
-                className="bg-success text-success-foreground hover:bg-success/90"
-              >
-                <Package className="w-4 h-4 mr-2" />
-                Approve from Inventory
-              </Button>
-            ) : (
-              <Button 
-                variant="default"
-                onClick={handleApproveForPurchase}
-                disabled={!isBudgetSufficient}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Approve for Purchase
-              </Button>
-            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

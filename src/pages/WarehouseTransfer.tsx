@@ -156,7 +156,7 @@ export default function WarehouseTransfer() {
   return (
     <AppLayout
       title="Warehouse Transfers"
-      subtitle="Transfer stock between warehouses (no approval required)"
+      subtitle="Transfer stock between warehouses"
       actions={
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
