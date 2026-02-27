@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Receipt, Edit, Trash2, Percent } from "lucide-react";
+import { Plus, Banknote, Edit, Trash2, Percent } from "lucide-react";
 
 interface TaxRate {
   id: string;
@@ -54,7 +54,7 @@ export default function TaxSetup() {
       header: "Tax Code",
       render: (item: TaxRate) => (
         <div className="flex items-center gap-2">
-          <Receipt className="w-4 h-4 text-muted-foreground" />
+          <Banknote className="w-4 h-4 text-muted-foreground" />
           <span className="font-mono text-sm">{item.code}</span>
         </div>
       ),
@@ -202,7 +202,7 @@ export default function TaxSetup() {
                 <p className="text-2xl font-bold">{taxRatesData.filter(t => t.status === "active").length}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-success" />
+                <Banknote className="w-5 h-5 text-success" />
               </div>
             </div>
           </CardContent>
@@ -241,7 +241,7 @@ export default function TaxSetup() {
                 <p className="text-2xl font-bold">4</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-warning" />
+                <Banknote className="w-5 h-5 text-warning" />
               </div>
             </div>
           </CardContent>

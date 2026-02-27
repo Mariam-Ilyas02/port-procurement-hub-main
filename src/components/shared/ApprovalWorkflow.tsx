@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ export function ApprovalWorkflow({
   onReject 
 }: ApprovalWorkflowProps) {
   const [comments, setComments] = useState("");
+  const [activeLevel, setActiveLevel] = useState<string | null>(null);
 
   return (
     <div className="space-y-4">
@@ -84,25 +85,25 @@ export function ApprovalWorkflow({
               )}
 
               {index === currentStep && step.status === "pending" && (
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-3">
                   <textarea
-                    className="w-full text-sm p-2 border rounded-md"
+                    className="w-full text-sm p-2 border rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     placeholder="Add comments (optional for approval, required for rejection)"
                     rows={2}
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Button 
                       size="sm" 
-                      className="flex-1"
+                      className="flex-1 bg-success hover:bg-success/90 text-white"
                       onClick={() => {
                         onApprove(step.level, comments);
                         setComments("");
                       }}
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Approve
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Approve Request
                     </Button>
                     <Button 
                       size="sm" 
@@ -117,8 +118,8 @@ export function ApprovalWorkflow({
                         setComments("");
                       }}
                     >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Reject
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject Request
                     </Button>
                   </div>
                 </div>
