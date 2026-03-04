@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, FileText, Building2, Banknote, Plus, X } from "lucide-react";
+import { Search, Filter, FileText, Building2, Banknote, Plus, X, Upload, Download } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 interface AssignedVendor {
@@ -8,7 +8,11 @@ interface AssignedVendor {
   requisitionName: string;
   vendorId: number;
   vendorName: string;
-  quotation: number;
+  quotationDoc: {
+    name: string;
+    size: string;
+    url: string;
+  };
 }
 
 const approvedRequisitions = [
@@ -26,7 +30,7 @@ const vendors = [
 ];
 
 export default function VendorQuotationPage() {
-  // Initialize with dummy data
+  // Initialize with dummy data including document references
   const [data, setData] = useState<AssignedVendor[]>([
     {
       id: 1,
@@ -34,7 +38,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Cement Bags",
       vendorId: 1,
       vendorName: "ABC Traders",
-      quotation: 7676547,
+      quotationDoc: {
+        name: "quotation_cement_abc.pdf",
+        size: "245 KB",
+        url: "#"
+      },
     },
     {
       id: 2,
@@ -42,7 +50,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Steel Rods",
       vendorId: 2,
       vendorName: "XYZ Suppliers",
-      quotation: 1250000,
+      quotationDoc: {
+        name: "steel_quotation_xyz.pdf",
+        size: "189 KB",
+        url: "#"
+      },
     },
     {
       id: 3,
@@ -50,7 +62,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Bricks",
       vendorId: 3,
       vendorName: "BuildMart",
-      quotation: 450000,
+      quotationDoc: {
+        name: "bricks_quote_buildmart.pdf",
+        size: "312 KB",
+        url: "#"
+      },
     },
     {
       id: 4,
@@ -58,7 +74,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Sand",
       vendorId: 4,
       vendorName: "Construction Hub",
-      quotation: 325000,
+      quotationDoc: {
+        name: "sand_quote_chub.pdf",
+        size: "178 KB",
+        url: "#"
+      },
     },
     {
       id: 5,
@@ -66,7 +86,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Cement Bags",
       vendorId: 3,
       vendorName: "BuildMart",
-      quotation: 7890000,
+      quotationDoc: {
+        name: "cement_alt_quote_bm.pdf",
+        size: "298 KB",
+        url: "#"
+      },
     },
     {
       id: 6,
@@ -74,7 +98,11 @@ export default function VendorQuotationPage() {
       requisitionName: "Steel Rods",
       vendorId: 4,
       vendorName: "Construction Hub",
-      quotation: 1180000,
+      quotationDoc: {
+        name: "steel_quote_chub.pdf",
+        size: "205 KB",
+        url: "#"
+      },
     },
   ]);
 
@@ -83,10 +111,16 @@ export default function VendorQuotationPage() {
 
   const [selectedRequisition, setSelectedRequisition] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("");
-  const [quotation, setQuotation] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
 
   const handleSave = () => {
-    if (!selectedRequisition || !selectedVendor || !quotation) return;
+    if (!selectedRequisition || !selectedVendor || !selectedFile) return;
 
     const requisition = approvedRequisitions.find(
       (r) => r.id === Number(selectedRequisition)
@@ -102,7 +136,11 @@ export default function VendorQuotationPage() {
       requisitionName: requisition!.name,
       vendorId: vendor!.id,
       vendorName: vendor!.name,
-      quotation: Number(quotation),
+      quotationDoc: {
+        name: selectedFile.name,
+        size: `${(selectedFile.size / 1024).toFixed(0)} KB`,
+        url: "#"
+      },
     };
 
     setData([...data, newEntry]);
@@ -110,7 +148,7 @@ export default function VendorQuotationPage() {
     // Reset form
     setSelectedRequisition("");
     setSelectedVendor("");
-    setQuotation("");
+    setSelectedFile(null);
     setShowForm(false);
   };
 
@@ -118,13 +156,14 @@ export default function VendorQuotationPage() {
   const filteredData = data.filter(
     (item) =>
       item.requisitionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.vendorName.toLowerCase().includes(searchQuery.toLowerCase())
+      item.vendorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.quotationDoc.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <AppLayout
       title="Vendor Quotations"
-      subtitle="Manage vendor quotations for approved requisitions"
+      subtitle="Manage vendor quotation documents for approved requisitions"
     >
       <div style={{ 
         padding: "24px",
@@ -274,7 +313,7 @@ export default function VendorQuotationPage() {
                     textTransform: "uppercase",
                     letterSpacing: "0.05em"
                   }}>
-                    Quotation (PKR)
+                    Quotation Document
                   </th>
                 </tr>
               </thead>
@@ -292,7 +331,7 @@ export default function VendorQuotationPage() {
                           No quotations found
                         </p>
                         <p style={{ margin: 0, fontSize: "14px" }}>
-                          {searchQuery ? "Try adjusting your search" : "Click 'Add Quotation' to create your first quotation"}
+                          {searchQuery ? "Try adjusting your search" : "Click 'Add Quotation' to upload your first quotation document"}
                         </p>
                       </div>
                     </td>
@@ -313,15 +352,54 @@ export default function VendorQuotationPage() {
                         </div>
                       </td>
                       <td style={{ padding: "16px 20px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <Banknote size={16} style={{ color: "#9ca3af" }} />
-                          <span style={{ 
-                            color: "#059669", 
-                            fontWeight: "600",
-                            fontSize: "15px"
-                          }}>
-                            ₨{item.quotation.toLocaleString()}
-                          </span>
+                        <div style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          gap: "12px",
+                          backgroundColor: "#f3f4f6",
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          width: "fit-content"
+                        }}>
+                          <FileText size={16} style={{ color: "#2563eb" }} />
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            <span style={{ 
+                              color: "#111827", 
+                              fontWeight: "500",
+                              fontSize: "13px"
+                            }}>
+                              {item.quotationDoc.name}
+                            </span>
+                            <span style={{ 
+                              color: "#6b7280", 
+                              fontSize: "11px"
+                            }}>
+                              {item.quotationDoc.size}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => window.open(item.quotationDoc.url, '_blank')}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#2563eb",
+                              padding: "4px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "4px",
+                              marginLeft: "4px"
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "#e5e7eb";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "transparent";
+                            }}
+                          >
+                            <Download size={14} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -371,7 +449,7 @@ export default function VendorQuotationPage() {
                   gap: "8px"
                 }}>
                   <FileText size={20} style={{ color: "#2563eb" }} />
-                  Add New Quotation
+                  Upload Quotation Document
                 </h3>
                 <button
                   onClick={() => setShowForm(false)}
@@ -477,36 +555,86 @@ export default function VendorQuotationPage() {
                   fontWeight: "500",
                   color: "#374151"
                 }}>
-                  Quotation Amount (PKR)
+                  Upload Quotation Document
                 </label>
-                <div style={{ position: "relative" }}>
-                  <Banknote style={{
-                    position: "absolute",
-                    left: "12px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "16px",
-                    height: "16px",
-                    color: "#9ca3af"
-                  }} />
+                <div style={{
+                  border: "2px dashed #d1d5db",
+                  borderRadius: "8px",
+                  padding: "20px",
+                  textAlign: "center",
+                  backgroundColor: "#f9fafb",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s"
+                }}
+                onMouseEnter={(e) => {
+                  const target = e.currentTarget;
+                  target.style.borderColor = "#2563eb";
+                  target.style.backgroundColor = "#eff6ff";
+                }}
+                onMouseLeave={(e) => {
+                  const target = e.currentTarget;
+                  target.style.borderColor = "#d1d5db";
+                  target.style.backgroundColor = "#f9fafb";
+                }}
+                >
                   <input
-                    type="number"
-                    value={quotation}
-                    onChange={(e) => setQuotation(e.target.value)}
-                    placeholder="Enter amount"
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px 10px 36px",
-                      borderRadius: "8px",
-                      border: "1px solid #d1d5db",
-                      fontSize: "14px",
-                      outline: "none",
-                      transition: "border-color 0.2s"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#2563eb"}
-                    onBlur={(e) => e.target.style.borderColor = "#d1d5db"}
+                    type="file"
+                    id="quotation-upload"
+                    style={{ display: "none" }}
+                    onChange={handleFileUpload}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                   />
+                  <label htmlFor="quotation-upload" style={{ cursor: "pointer" }}>
+                    <Upload style={{
+                      width: "32px",
+                      height: "32px",
+                      color: "#9ca3af",
+                      marginBottom: "8px"
+                    }} />
+                    <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: "500", color: "#374151" }}>
+                      Click to upload or drag and drop
+                    </p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#6b7280" }}>
+                      PDF, DOC, XLS, Images (max 10MB)
+                    </p>
+                  </label>
                 </div>
+
+                {selectedFile && (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "10px",
+                    backgroundColor: "#f3f4f6",
+                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}>
+                    <FileText size={16} style={{ color: "#2563eb" }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "13px", fontWeight: "500", color: "#111827" }}>
+                        {selectedFile.name}
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#6b7280" }}>
+                        {(selectedFile.size / 1024).toFixed(0)} KB
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedFile(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#9ca3af",
+                        padding: "4px"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = "#ef4444"}
+                      onMouseLeave={(e) => e.currentTarget.style.color = "#9ca3af"}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
@@ -536,21 +664,30 @@ export default function VendorQuotationPage() {
                 </button>
                 <button
                   onClick={handleSave}
+                  disabled={!selectedRequisition || !selectedVendor || !selectedFile}
                   style={{
                     padding: "10px 20px",
-                    backgroundColor: "#2563eb",
+                    backgroundColor: !selectedRequisition || !selectedVendor || !selectedFile ? "#9ca3af" : "#2563eb",
                     color: "white",
                     border: "none",
                     borderRadius: "8px",
-                    cursor: "pointer",
+                    cursor: !selectedRequisition || !selectedVendor || !selectedFile ? "not-allowed" : "pointer",
                     fontSize: "14px",
                     fontWeight: "500",
                     transition: "background-color 0.2s"
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1d4ed8")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
+                  onMouseEnter={(e) => {
+                    if (selectedRequisition && selectedVendor && selectedFile) {
+                      e.currentTarget.style.backgroundColor = "#1d4ed8";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedRequisition && selectedVendor && selectedFile) {
+                      e.currentTarget.style.backgroundColor = "#2563eb";
+                    }
+                  }}
                 >
-                  Save Quotation
+                  Upload Quotation
                 </button>
               </div>
             </div>

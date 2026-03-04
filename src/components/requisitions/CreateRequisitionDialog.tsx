@@ -294,7 +294,6 @@
 //     </Dialog>
 //   );
 // }
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -314,7 +313,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, FileText } from "lucide-react";
 
 interface CreateRequisitionDialogProps {
   open: boolean;
@@ -339,7 +337,6 @@ export function CreateRequisitionDialog({ open, onOpenChange }: CreateRequisitio
   const [selectedCatalogItem, setSelectedCatalogItem] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
-  const [attachments, setAttachments] = useState<File[]>([]);
 
   const totalCost = quantity * estimatedPrice;
 
@@ -350,12 +347,6 @@ export function CreateRequisitionDialog({ open, onOpenChange }: CreateRequisitio
       setCategory(item.category);
       setSubcategory(item.subcategory);
       setEstimatedPrice(item.estimatedPrice);
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setAttachments([...attachments, ...Array.from(e.target.files)]);
     }
   };
 
@@ -458,31 +449,6 @@ export function CreateRequisitionDialog({ open, onOpenChange }: CreateRequisitio
           <div>
             <Label>Justification</Label>
             <Textarea rows={2} placeholder="Reason for request..." />
-          </div>
-
-          {/* Attachments */}
-          <div>
-            <Label>Attachments</Label>
-            <div className="border rounded-md p-3 text-center text-sm">
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                id="upload"
-                onChange={handleFileUpload}
-              />
-              <label htmlFor="upload" className="cursor-pointer flex flex-col items-center">
-                <Upload className="w-4 h-4 mb-1" />
-                Click to upload
-              </label>
-            </div>
-
-            {attachments.map((file, i) => (
-              <div key={i} className="text-xs flex items-center gap-2 mt-1">
-                <FileText className="w-3 h-3" />
-                {file.name}
-              </div>
-            ))}
           </div>
         </div>
 
