@@ -431,30 +431,10 @@ const openReviewDialog = (request: PendingRequest) => {
 const handleApprove = (level: string, comments: string) => {
   if (!selectedRequest) return;
   
-  // Validate vendor selection if needed
-  if (needsVendorSelection && !selectedVendor) {
-    toast({
-      title: "Vendor Required",
-      description: "Please select a vendor for this purchase.",
-      variant: "destructive",
-    });
-    return;
-  }
-
-  // Validate manual amount entry
-  if (needsVendorSelection && (!approvedAmount || approvedAmount <= 0)) {
-    toast({
-      title: "Amount Required",
-      description: "Please enter the approved amount manually.",
-      variant: "destructive",
-    });
-    return;
-  }
-
-  // Use manually entered amount for vendor purchases, otherwise use estimated cost
-  const amountToApprove = needsVendorSelection ? approvedAmount : selectedRequest.estimatedCost;
+  // Use estimated cost as the amount to approve
+  const amountToApprove = selectedRequest.estimatedCost;
   
-  // Check if approved amount exceeds budget
+  // Check if amount exceeds budget
   if (budgetCheck && amountToApprove > budgetCheck.remainingBudget) {
     toast({
       title: "Budget Exceeded",
@@ -464,9 +444,7 @@ const handleApprove = (level: string, comments: string) => {
     return;
   }
 
-  const selectedVendorDetails = selectedVendor ? getVendorById(selectedVendor) : null;
-
-  // Update the approval step with vendor info and manually entered amount
+  // Update the approval step with info
   const updatedSteps = selectedRequest.approvalSteps?.map((step, index) => {
     if (step.level === level) {
       return { 
@@ -474,14 +452,12 @@ const handleApprove = (level: string, comments: string) => {
         status: "approved" as const, 
         date: new Date().toISOString().split('T')[0], 
         comments,
-        vendorId: selectedVendor,
         approvedAmount: amountToApprove
       };
     }
     return step;
   });
 
-  // Rest of the function remains the same...
   const nextStep = (selectedRequest.approvalStep || 0) + 1;
   
   // Check if this was the last step
@@ -490,25 +466,15 @@ const handleApprove = (level: string, comments: string) => {
     if (isInventoryAvailable) {
       handleApproveFromInventory();
     } else {
-      // Include vendor info and manually entered amount in final approval
-      const vendorInfo = selectedVendorDetails 
-        ? `Vendor: ${selectedVendorDetails.name}, Amount: ₨${amountToApprove.toLocaleString()}`
-        : '';
-      
       toast({
         title: "Purchase Order Created",
-        description: `Request approved for purchase. ${vendorInfo}`,
+        description: `Request approved for purchase.`,
       });
     }
   } else {
-    // Show vendor info in toast for next step
-    const vendorMessage = selectedVendorDetails 
-      ? ` Selected vendor: ${selectedVendorDetails.name}` 
-      : '';
-    
     toast({
       title: "Step Approved",
-      description: `Request moved to next approval level.${vendorMessage}`,
+      description: `Request moved to next approval level.`,
     });
   }
   
@@ -537,234 +503,6 @@ const handleApprove = (level: string, comments: string) => {
       description: `Notification sent to ${selectedRequest.requester} (${selectedRequest.requesterEmail}). Item will be issued from inventory.`,
     });
   };
-
-  // Vendor Selection Component
-
-  const VendorSelectionSection = () => {
-  if (!selectedRequest || !vendorQuotes.length) return null;
-
-  const selectedQuote = getSelectedVendorQuote();
-  const selectedVendorDetails = selectedVendor ? getVendorById(selectedVendor) : null;
-
-  // Use local state for the input to prevent re-renders from scrolling
-  const [localAmount, setLocalAmount] = useState<string>(approvedAmount ? approvedAmount.toString() : '');
-
-  // Update local state when prop changes
-  useEffect(() => {
-    setLocalAmount(approvedAmount ? approvedAmount.toString() : '');
-  }, [approvedAmount]);
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalAmount(value);
-    
-    // Only update parent state when value is valid number
-    if (value === '') {
-      setApprovedAmount(0);
-    } else {
-      const numValue = Number(value);
-      if (!isNaN(numValue)) {
-        setApprovedAmount(numValue);
-      }
-    }
-  };
-
-  const handleVendorChange = (value: string) => {
-    setSelectedVendor(value);
-    // Force a small delay to prevent any scroll issues
-    // setTimeout(() => {
-    //   const element = document.activeElement as HTMLElement;
-    //   if (element) {
-    //     element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    //   }
-    // }, 10);
-  };
-
-  return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Building2 className="w-5 h-5 text-primary" />
-        <h4 className="font-semibold">Vendor Selection</h4>
-      </div>
-
-      <div className="space-y-4">
-        {/* Vendor Selection Dropdown - Field 1 */}
-        <div className="space-y-2">
-          <Label htmlFor="vendor" className="flex items-center gap-1">
-            <Building2 className="w-4 h-4" />
-            Select Vendor
-          </Label>
-          <Select
-            value={selectedVendor}
-            onValueChange={handleVendorChange}
-          >
-            <SelectTrigger id="vendor">
-              <SelectValue placeholder="Choose a vendor" />
-            </SelectTrigger>
-            <SelectContent>
-              {vendorQuotes.map((quote) => {
-                const vendor = getVendorById(quote.vendorId);
-                return (
-                  <SelectItem key={quote.vendorId} value={quote.vendorId}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{vendor?.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {/* Quote: ₨{quote.quotedPrice.toLocaleString()} | Delivery: {quote.deliveryDays} days */}
-                      </span>
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Manual Amount Entry - Field 2 - FIXED */}
-        <div className="space-y-2">
-          <Label htmlFor="approvedAmount" className="flex items-center gap-1">
-            <Banknote className="w-4 h-4" />
-            Enter Quotation Amount
-          </Label>
-          <div className="relative">
-            <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              id="approvedAmount"
-              type="number"
-              className="pl-9"
-              placeholder="Enter approved amount"
-              // value={localAmount}
-              // onChange={handleAmountChange}
-              // onClick={(e) => {
-              //   // Prevent any default scroll behavior
-              //   e.stopPropagation();
-              // }}
-              // onFocus={(e) => {
-              //   // Ensure the element stays in view
-              //   setTimeout(() => {
-              //     e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              //   }, 50);
-              // }}
-              // min={1}
-              // step="any"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Enter the amount manually as received via email
-          </p>
-        </div>
-
-        {/* Rest of the component remains the same... */}
-        {selectedVendorDetails && selectedQuote && (
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <h5 className="text-sm font-medium">Vendor Quote Reference</h5>
-            
-            {/* Vendor Details Card */}
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-medium">{selectedVendorDetails.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedVendorDetails.contactPerson}
-                  </p>
-                </div>
-                {selectedVendorDetails.preferred && (
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-                    Preferred
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Email</p>
-                  <p>{selectedVendorDetails.email}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Phone</p>
-                  <p>{selectedVendorDetails.phone}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quote Details for Reference */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-muted/30 rounded">
-                <p className="text-xs text-muted-foreground">Quoted Price (Reference)</p>
-                <p className="font-semibold text-lg">
-                  ₨{selectedQuote.quotedPrice.toLocaleString()}
-                </p>
-              </div>
-              <div className="p-3 bg-muted/30 rounded">
-                <p className="text-xs text-muted-foreground">Delivery Time</p>
-                <p className="font-semibold flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {selectedQuote.deliveryDays} days
-                </p>
-              </div>
-              <div className="p-3 bg-muted/30 rounded">
-                <p className="text-xs text-muted-foreground">Payment Terms</p>
-                <p className="font-medium">{selectedQuote.paymentTerms}</p>
-              </div>
-              <div className="p-3 bg-muted/30 rounded">
-                <p className="text-xs text-muted-foreground">Quote Valid Until</p>
-                <p className="font-medium">{selectedQuote.validityDate}</p>
-              </div>
-            </div>
-
-            {/* Show warning if manual amount differs significantly from quote */}
-<div
-  className={`flex items-center gap-2 p-2 rounded transition-all duration-200 ${
-    approvedAmount > 0 &&
-    Math.abs(approvedAmount - selectedQuote.quotedPrice) /
-      selectedQuote.quotedPrice >
-      0.1
-      ? "text-warning bg-warning/10 opacity-100"
-      : "opacity-0 pointer-events-none h-[36px]"
-  }`}
->
-  <AlertTriangle className="w-4 h-4" />
-  <span className="text-sm">
-    Warning: Manual amount differs from vendor quote by more than 10%
-  </span>
-</div>
-          </div>
-        )}
-
-        {/* Quote Comparison Table (for reference when multiple vendors) */}
-        {vendorQuotes.length > 1 && (
-          <div className="mt-4 border-t pt-4">
-            <p className="text-sm font-medium mb-2">All Vendor Quotes (For Reference)</p>
-            <div className="space-y-2">
-              {vendorQuotes.map((quote) => {
-                const vendor = getVendorById(quote.vendorId);
-                const isSelected = quote.vendorId === selectedVendor;
-                return (
-                  <div 
-                    key={quote.vendorId}
-                    className={`flex justify-between items-center p-2 rounded text-sm ${
-                      isSelected ? 'bg-primary/10 border border-primary/20' : 'bg-muted/30'
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <span className="font-medium">{vendor?.name}</span>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                        {/* <span>Quote: ₨{quote.quotedPrice.toLocaleString()}</span>
-                        <span>Delivery: {quote.deliveryDays} days</span>
-                        <span>Terms: {quote.paymentTerms}</span> */}
-                      </div>
-                    </div>
-                    {isSelected && (
-                      <CheckCircle className="w-4 h-4 text-primary ml-2" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
@@ -960,7 +698,6 @@ const handleApprove = (level: string, comments: string) => {
             </DialogTitle>
             <DialogDescription>
               Review the request details, check inventory availability, and verify budget limits before approval.
-              {needsVendorSelection && " Select a vendor for this purchase."}
             </DialogDescription>
           </DialogHeader>
 
@@ -983,9 +720,6 @@ const handleApprove = (level: string, comments: string) => {
                   />
                 </div>
               )}
-
-              {/* Vendor Selection Section - Show when needed */}
-              {needsVendorSelection && <VendorSelectionSection />}
 
               {/* Inventory Check */}
               <div className="border rounded-lg p-4">
@@ -1053,18 +787,18 @@ const handleApprove = (level: string, comments: string) => {
                         style={{ width: `${(budgetCheck.usedBudget / budgetCheck.totalBudget) * 100}%` }}
                       />
                     </div>
-                    {(needsVendorSelection ? approvedAmount : selectedRequest.estimatedCost) <= budgetCheck.remainingBudget ? (
+                    {selectedRequest.estimatedCost <= budgetCheck.remainingBudget ? (
                       <div className="flex items-center gap-2 text-success bg-success/10 p-2 rounded">
                         <CheckCircle className="w-4 h-4" />
                         <span className="text-sm">
-                          Budget available. Remaining after approval: ₨{(budgetCheck.remainingBudget - (needsVendorSelection ? approvedAmount : selectedRequest.estimatedCost)).toLocaleString()}
+                          Budget available. Remaining after approval: ₨{(budgetCheck.remainingBudget - selectedRequest.estimatedCost).toLocaleString()}
                         </span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-2 rounded">
                         <XCircle className="w-4 h-4" />
                         <span className="text-sm">
-                          Budget exceeded! Amount (₨{(needsVendorSelection ? approvedAmount : selectedRequest.estimatedCost).toLocaleString()}) exceeds remaining budget (₨{budgetCheck.remainingBudget.toLocaleString()})
+                          Budget exceeded! Amount (₨{selectedRequest.estimatedCost.toLocaleString()}) exceeds remaining budget (₨{budgetCheck.remainingBudget.toLocaleString()})
                         </span>
                       </div>
                     )}
@@ -1082,7 +816,6 @@ const handleApprove = (level: string, comments: string) => {
                 <Mail className="w-4 h-4" />
                 <span className="text-sm">
                   The requester ({selectedRequest.requesterEmail}) will be notified of your decision via email.
-                  {selectedVendor && " Vendor information will be included in the notification."}
                 </span>
               </div>
             </div>

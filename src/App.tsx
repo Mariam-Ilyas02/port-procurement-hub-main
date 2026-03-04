@@ -32,6 +32,8 @@ import PaymentModes from "./pages/PaymentModes";
 import ContractTypes from "./pages/ContractTypes";
 import ApprovalMatrix from "./pages/ApprovalMatrix";
 import NotFound from "./pages/NotFound";
+import DirectEntry from "./pages/DirectEntry";
+import VendorQuotations from "./pages/VendorQuotations";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,7 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/requisitions" element={<Requisitions />} />
           <Route path="/department-approval" element={<DepartmentApproval />} />
+          <Route path="/vendor-quotations" element={<VendorQuotations />} />
           <Route path="/purchase-orders" element={<PurchaseOrders />} />
           <Route path="/goods-receipt" element={<GoodsReceipt />} />
           <Route path="/pay-orders" element={<PayOrders />} />
@@ -64,6 +67,7 @@ const App = () => (
 <Route path="/asset-categories" element={<AssetCategories />} />
 <Route path="/adjustment-reasons" element={<AdjustmentReasons />} />
 <Route path="/stock-adjustment" element={<StockAdjustment />} />
+<Route path="/direct-entry" element={<DirectEntry />} />
 <Route path="/payment-modes" element={<PaymentModes />} />
 <Route path="/contract-types" element={<ContractTypes />} />
           <Route path="/categories" element={<Categories />} />
