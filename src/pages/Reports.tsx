@@ -148,7 +148,7 @@ export default function Reports() {
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted/30 rounded-lg">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">$245,000</p>
+                    <p className="text-3xl font-bold">Rs245,000</p>
                     <p className="text-sm text-muted-foreground">This Month</p>
                     <p className="text-sm text-success mt-1">+12% from last month</p>
                   </div>
@@ -208,7 +208,7 @@ export default function Reports() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Avg PO Value</span>
-                    <span className="font-medium">$18,500</span>
+                    <span className="font-medium">Rs18,500</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Inventory Turnover</span>
@@ -220,7 +220,7 @@ export default function Reports() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Cost Savings</span>
-                    <span className="font-medium text-success">$32,000</span>
+                    <span className="font-medium text-success">Rs32,000</span>
                   </div>
                 </div>
               </CardContent>

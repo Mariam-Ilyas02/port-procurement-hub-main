@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 type StatusType = 
   | "draft" 
+  | "submitted"
+  | "po_created"
   | "pending" 
   | "pending_dept"
   | "pending_senior"
@@ -39,6 +41,14 @@ const statusConfig: Record<StatusType, { label: string; className: string }> = {
     label: "Draft", 
     className: "bg-muted text-muted-foreground hover:bg-muted" 
   },
+  submitted: {
+  label: "Submitted",
+  className: "bg-primary/10 text-primary hover:bg-primary/20",
+},
+po_created: {
+  label: "PO Created",
+  className: "bg-primary/10 text-primary hover:bg-primary/20",
+},
   pending: { 
     label: "Pending", 
     className: "bg-warning/10 text-warning hover:bg-warning/20" 

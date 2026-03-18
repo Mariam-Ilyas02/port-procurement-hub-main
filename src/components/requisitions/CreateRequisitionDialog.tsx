@@ -294,7 +294,8 @@
 //     </Dialog>
 //   );
 // }
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -313,151 +314,446 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Upload,
+  FileText,
+  ChevronRight,
+  Package,
+} from "lucide-react";
+import type { Requisition, RequisitionStatus, ApprovalLevel, ApprovalType, BudgetStatus } from "@/pages/Requisitions";
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface CreateRequisitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreate: (req: Requisition) => void;
+  existingCount: number;
 }
 
+// ─── Reference Data ───────────────────────────────────────────────────────────
+
+const SENIOR_THRESHOLD = 10000;
+
 const categories = {
-  Fuel: ["Bulk Fuel", "Petrol"],
-  Oil: ["Lubricants", "Hydraulic"],
-  Stationary: ["Office Supplies"],
-  Safety: ["PPE"],
+  Oil:         ["Petrol", "Diesel", "Lubricants", "Hydraulic Fluid"],
+  "Spare Parts": ["Engine Parts", "Filters", "Belts", "Bearings"],
+  Consumables: ["Stationery", "Cleaning Supplies", "Safety Gear"],
+  Equipment:   ["Workshop Tools", "IT Equipment", "Office Equipment"],
+  Safety:      ["PPE", "Fire Safety", "First Aid"],
 };
 
 const catalogItems = [
-  { id: "1", name: "Diesel Fuel", category: "Fuel", subcategory: "Bulk Fuel", unit: "L", estimatedPrice: 9 },
-  { id: "2", name: "Engine Oil SAE 40", category: "Oil", subcategory: "Lubricants", unit: "L", estimatedPrice: 42.5 },
+  { id: "c1", name: "Diesel Fuel",      category: "Oil",         subcategory: "Diesel",         unit: "L",   estimatedPrice: 9    },
+  { id: "c2", name: "Engine Oil SAE 40", category: "Oil",         subcategory: "Lubricants",     unit: "L",   estimatedPrice: 42.5 },
+  { id: "c3", name: "Hydraulic Oil",     category: "Oil",         subcategory: "Hydraulic Fluid", unit: "L",   estimatedPrice: 28   },
+  { id: "c4", name: "Safety Helmets",    category: "Safety",      subcategory: "PPE",            unit: "Pcs", estimatedPrice: 240  },
+  { id: "c5", name: "Printer Paper A4",  category: "Consumables", subcategory: "Stationery",     unit: "Pcs", estimatedPrice: 5    },
+  { id: "c6", name: "Oil Filter",        category: "Spare Parts", subcategory: "Filters",        unit: "Pcs", estimatedPrice: 450  },
 ];
 
-export function CreateRequisitionDialog({ open, onOpenChange }: CreateRequisitionDialogProps) {
-  const [category, setCategory] = useState("");
-  const [subcategory, setSubcategory] = useState("");
-  const [selectedCatalogItem, setSelectedCatalogItem] = useState("");
-  const [quantity, setQuantity] = useState(0);
-  const [estimatedPrice, setEstimatedPrice] = useState(0);
+const departments = ["Operations", "Workshop", "Admin", "Finance", "Procurement"];
+const units       = ["L", "Pcs", "Kg", "Box", "Set", "Pairs", "m"];
 
-  const totalCost = quantity * estimatedPrice;
+// Mock inventory stock
+const inventoryStock: Record<string, { available: boolean; quantity: number }> = {
+  "Diesel Fuel":       { available: true,  quantity: 15000 },
+  "Engine Oil SAE 40": { available: true,  quantity: 200   },
+  "Hydraulic Oil":     { available: true,  quantity: 50    },
+  "Safety Helmets":    { available: false, quantity: 0     },
+  "Printer Paper A4":  { available: false, quantity: 0     },
+  "Oil Filter":        { available: true,  quantity: 12    },
+};
 
+// Mock department budgets
+const departmentBudgets: Record<string, { allocated: number; used: number; remaining: number }> = {
+  Operations:  { allocated: 500000, used: 325000, remaining: 175000 },
+  Workshop:    { allocated: 200000, used: 145000, remaining: 55000  },
+  Admin:       { allocated: 100000, used: 45000,  remaining: 55000  },
+  Finance:     { allocated: 80000,  used: 20000,  remaining: 60000  },
+  Procurement: { allocated: 150000, used: 60000,  remaining: 90000  },
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const fmt = (n: number) => "₨" + n.toLocaleString();
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function CreateRequisitionDialog({
+  open,
+  onOpenChange,
+  onCreate,
+  existingCount,
+}: CreateRequisitionDialogProps) {
+  // Form state
+  const [catalogId,      setCatalogId]      = useState("");
+  const [itemName,       setItemName]        = useState("");
+  const [category,       setCategory]        = useState("");
+  const [subcategory,    setSubcategory]     = useState("");
+  const [unit,           setUnit]            = useState("Pcs");
+  const [quantity,       setQuantity]        = useState(0);
+  const [unitPrice,      setUnitPrice]       = useState(0);
+  const [requiredDate,   setRequiredDate]    = useState("");
+  const [department,     setDepartment]      = useState("");
+  const [justification,  setJustification]   = useState("");
+  const [attachments,    setAttachments]     = useState<File[]>([]);
+
+  const totalCost = quantity * unitPrice;
+
+  // Derived checks
+  const inventoryInfo = inventoryStock[itemName];
+  const budgetInfo    = departmentBudgets[department];
+  const budgetOk      = budgetInfo ? totalCost <= budgetInfo.remaining : null;
+  const needsSenior   = totalCost > SENIOR_THRESHOLD;
+
+  const approvalLevel: ApprovalLevel =
+    !department ? "none"
+    : needsSenior ? "senior_management"
+    : "dept_manager";
+
+  const budgetStatus: BudgetStatus =
+    !budgetInfo ? "pending"
+    : budgetOk ? "within"
+    : "exceeds";
+
+  const approvalType: ApprovalType =
+    !itemName ? "pending"
+    : inventoryInfo?.available && inventoryInfo.quantity >= quantity ? "inventory"
+    : "purchase";
+
+  // Reset when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setCatalogId(""); setItemName(""); setCategory(""); setSubcategory("");
+      setUnit("Pcs"); setQuantity(0); setUnitPrice(0); setRequiredDate("");
+      setDepartment(""); setJustification(""); setAttachments([]);
+    }
+  }, [open]);
+
+  // Handle catalog item selection
   const handleCatalogSelect = (id: string) => {
-    setSelectedCatalogItem(id);
-    const item = catalogItems.find(c => c.id === id);
+    setCatalogId(id);
+    const item = catalogItems.find((c) => c.id === id);
     if (item) {
+      setItemName(item.name);
       setCategory(item.category);
       setSubcategory(item.subcategory);
-      setEstimatedPrice(item.estimatedPrice);
+      setUnit(item.unit);
+      setUnitPrice(item.estimatedPrice);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setAttachments((prev) => [...prev, ...Array.from(e.target.files!)]);
+  };
+
+  const isValid = itemName && category && quantity > 0 && unitPrice > 0 && requiredDate && department && justification;
+
+  const handleCreate = (asDraft: boolean) => {
+    const today = new Date().toISOString().split("T")[0];
+    const newReq: Requisition = {
+      id:                   Date.now().toString(),
+      requestNumber:        `REQ-2026-${String(existingCount + 1).padStart(3, "0")}`,
+      item:                 itemName,
+      category,
+      subcategory,
+      unit,
+      quantity,
+      estimatedUnitPrice:   unitPrice,
+      totalEstimatedCost:   totalCost,
+      justification,
+      requiredDate,
+      requester:            "Current User",
+      requesterEmail:       "user@company.com",
+      department,
+      status:               asDraft ? "draft" : "submitted",
+      inventoryAvailable:   inventoryInfo?.available ?? false,
+      inventoryQuantity:    inventoryInfo?.quantity ?? 0,
+      budgetStatus,
+      approvalType,
+      approvalLevel,
+      createdAt:            today,
+      notificationSent:     !asDraft,
+      attachments:          attachments.map((f) => f.name),
+      auditTrail: asDraft
+        ? [{ date: today, action: "Created", by: "Current User" }]
+        : [
+            { date: today, action: "Created",   by: "Current User" },
+            { date: today, action: "Submitted", by: "Current User" },
+          ],
+    };
+    onCreate(newReq);
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Requisition</DialogTitle>
+          <DialogTitle>Create new requisition</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 py-2">
 
-          {/* Catalog */}
-          <div>
-            <Label>Catalog Item (Optional)</Label>
-            <Select onValueChange={handleCatalogSelect}>
+          {/* Catalog picker */}
+          <div className="space-y-1.5">
+            <Label>Select from catalog (optional — pre-approved items)</Label>
+            <Select value={catalogId} onValueChange={handleCatalogSelect}>
               <SelectTrigger>
-                <SelectValue placeholder="Select item from catalog" />
+                <SelectValue placeholder="Choose a pre-approved item..." />
               </SelectTrigger>
               <SelectContent>
-                {catalogItems.map(item => (
+                {catalogItems.map((item) => (
                   <SelectItem key={item.id} value={item.id}>
-                    {item.name}
+                    <span className="font-medium">{item.name}</span>
+                    <span className="text-muted-foreground text-xs ml-1">
+                      · {item.category} · {fmt(item.estimatedPrice)}/{item.unit}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Category / Subcategory */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Category</Label>
-              <Select value={category} onValueChange={(val) => {
-                setCategory(val);
-                setSubcategory("");
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
+          {/* Item + Category */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Item name</Label>
+              <Input
+                placeholder="Enter item name"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Department</Label>
+              <Select value={department} onValueChange={setDepartment}>
+                <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
                 <SelectContent>
-                  {Object.keys(categories).map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Category</Label>
+              <Select value={category} onValueChange={(v) => { setCategory(v); setSubcategory(""); }}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  {Object.keys(categories).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Subcategory</Label>
+              <Select value={subcategory} onValueChange={setSubcategory} disabled={!category}>
+                <SelectTrigger><SelectValue placeholder="Select subcategory" /></SelectTrigger>
+                <SelectContent>
+                  {(categories[category as keyof typeof categories] ?? []).map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div>
-              <Label>Subcategory</Label>
-              <Select value={subcategory} onValueChange={setSubcategory} disabled={!category}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select subcategory" />
-                </SelectTrigger>
+          {/* Quantity / Unit / Price */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label>Quantity</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={quantity || ""}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Unit</Label>
+              <Select value={unit} onValueChange={setUnit}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {category &&
-                    categories[category as keyof typeof categories].map(sub => (
-                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                    ))}
+                  {units.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <Label>Item Description</Label>
-            <Textarea rows={2} placeholder="Enter item details..." />
-          </div>
-
-          {/* Quantity / Price */}
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label>Quantity</Label>
-              <Input type="number" onChange={(e) => setQuantity(Number(e.target.value))} />
-            </div>
-
-            <div>
-              <Label>Unit Price</Label>
+            <div className="space-y-1.5">
+              <Label>Estimated unit price (₨)</Label>
               <Input
                 type="number"
-                value={estimatedPrice}
-                onChange={(e) => setEstimatedPrice(Number(e.target.value))}
+                placeholder="0.00"
+                value={unitPrice || ""}
+                onChange={(e) => setUnitPrice(Number(e.target.value))}
               />
-            </div>
-
-            <div>
-              <Label>Total Cost</Label>
-              <Input value={`₨${totalCost.toLocaleString()}`} disabled />
             </div>
           </div>
 
-          {/* Required Date */}
-          <div>
-            <Label>Required Date</Label>
-            <Input type="date" />
+          {/* Total cost display */}
+          {totalCost > 0 && (
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">Total estimated cost</span>
+              <span className="text-lg font-semibold">{fmt(totalCost)}</span>
+            </div>
+          )}
+
+          {/* Required date */}
+          <div className="space-y-1.5">
+            <Label>Required date</Label>
+            <Input
+              type="date"
+              min={new Date().toISOString().split("T")[0]}
+              value={requiredDate}
+              onChange={(e) => setRequiredDate(e.target.value)}
+            />
           </div>
 
           {/* Justification */}
-          <div>
+          <div className="space-y-1.5">
             <Label>Justification</Label>
-            <Textarea rows={2} placeholder="Reason for request..." />
+            <Textarea
+              placeholder="Explain why this item is needed..."
+              rows={2}
+              value={justification}
+              onChange={(e) => setJustification(e.target.value)}
+            />
+          </div>
+
+          {/* Live checks — only show when enough data entered */}
+          {itemName && (
+            <div className="grid grid-cols-2 gap-3">
+              {/* Inventory check */}
+              <div className={`p-3 rounded-lg border text-sm ${
+                approvalType === "inventory" ? "border-success/30 bg-success/5"
+                : approvalType === "purchase" ? "border-primary/30 bg-primary/5"
+                : "border-muted bg-muted/30"
+              }`}>
+                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                  <Package className="w-3.5 h-3.5" /> Inventory check
+                </p>
+                {inventoryInfo ? (
+                  approvalType === "inventory" ? (
+                    <p className="text-success text-xs flex items-center gap-1">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      {inventoryInfo.quantity} {unit} available — will issue from stock
+                    </p>
+                  ) : (
+                    <p className="text-primary text-xs flex items-center gap-1">
+                      <XCircle className="w-3.5 h-3.5" />
+                      Insufficient stock — will raise purchase order
+                    </p>
+                  )
+                ) : (
+                  <p className="text-muted-foreground text-xs">Item not in inventory — will raise purchase order</p>
+                )}
+              </div>
+
+              {/* Budget check */}
+              <div className={`p-3 rounded-lg border text-sm ${
+                budgetStatus === "within"  ? "border-success/30 bg-success/5"
+                : budgetStatus === "exceeds" ? "border-destructive/30 bg-destructive/5"
+                : "border-muted bg-muted/30"
+              }`}>
+                <p className="text-xs text-muted-foreground mb-1">Budget check</p>
+                {budgetInfo ? (
+                  <div className="space-y-1">
+                    <p className={`text-xs font-medium ${
+                      budgetStatus === "within" ? "text-success" : "text-destructive"
+                    }`}>
+                      {budgetStatus === "within" ? "✓ Within budget" : "✗ Exceeds budget"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {fmt(budgetInfo.remaining)} remaining of {fmt(budgetInfo.allocated)}
+                    </p>
+                    {budgetStatus === "within" && totalCost > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        After approval: {fmt(budgetInfo.remaining - totalCost)} left
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Select department to check budget</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Senior approval warning */}
+          {needsSenior && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-warning text-sm">
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              Amount exceeds ₨10,000 — requires senior management approval in addition to department approval.
+            </div>
+          )}
+
+          {/* Approval path preview */}
+          {department && (
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-2">Approval path</p>
+              <div className="flex items-center gap-2 text-xs flex-wrap">
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">Requester</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">Dept manager</span>
+                {needsSenior && (
+                  <>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                    <span className="px-2 py-0.5 rounded-full bg-warning/10 text-warning">Senior management</span>
+                  </>
+                )}
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="px-2 py-0.5 rounded-full bg-success/10 text-success">
+                  {approvalType === "inventory" ? "Issue from stock" : "Auto-generate PO"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Attachments */}
+          <div className="space-y-1.5">
+            <Label>Attachments (optional)</Label>
+            <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary/40 transition-colors">
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                id="req-file-upload"
+                onChange={handleFileUpload}
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              />
+              <label htmlFor="req-file-upload" className="cursor-pointer">
+                <Upload className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Click to upload PDF, images, or documents</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Max 10MB per file</p>
+              </label>
+            </div>
+            {attachments.length > 0 && (
+              <div className="space-y-1 mt-2">
+                {attachments.map((file, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm p-2 bg-muted/50 rounded">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span className="flex-1 truncate">{file.name}</span>
+                    <span className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</span>
+                    <button
+                      className="text-muted-foreground hover:text-destructive text-xs"
+                      onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
+                    >✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => handleCreate(true)} disabled={!itemName}>
+            Save as draft
           </Button>
-          <Button variant="secondary">Save as Draft</Button>
-          <Button>Submit</Button>
+          <Button onClick={() => handleCreate(false)} disabled={!isValid}>
+            Submit for approval
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
