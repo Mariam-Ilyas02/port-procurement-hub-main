@@ -153,7 +153,7 @@ export default function Suppliers() {
 
   // New supplier form state
   const [newSupplier, setNewSupplier] = useState({
-    name: "", category: "", contactPerson: "", designation: "",
+    name: "", categories: [] as string[], contactPerson: "", designation: "",
     email: "", phone: "", address: "", taxNumber: "", paymentTerms: ""
   });
 
@@ -161,23 +161,24 @@ export default function Suppliers() {
   const [newItem, setNewItem] = useState({ name: "", category: "", unit: "" });
 
   const handleAddSupplier = () => {
-    if (!newSupplier.name || !newSupplier.category) {
+if (!newSupplier.name || newSupplier.categories.length === 0){
       toast({ title: "Required fields missing", description: "Company name and category are required.", variant: "destructive" });
       return;
     }
     const code = `SUP-${String(suppliers.length + 1).padStart(3, "0")}`;
-    const supplier: Supplier = {
-      id: String(Date.now()),
-      code,
-      ...newSupplier,
-      rating: 0,
-      totalOrders: 0,
-      totalSpend: "₨0",
-      status: "active",
-      items: [],
-    };
+const supplier: Supplier = {
+  id: String(Date.now()),
+  code,
+  ...newSupplier,
+  category: newSupplier.categories.join(", "), // optional for display
+  rating: 0,
+  totalOrders: 0,
+  totalSpend: "₨0",
+  status: "active",
+  items: [],
+};
     setSuppliers(prev => [...prev, supplier]);
-    setNewSupplier({ name: "", category: "", contactPerson: "", designation: "", email: "", phone: "", address: "", taxNumber: "", paymentTerms: "" });
+    setNewSupplier({ name: "", categories: [], contactPerson: "", designation: "", email: "", phone: "", address: "", taxNumber: "", paymentTerms: "" });
     setIsCreateDialogOpen(false);
     toast({ title: "Supplier Added", description: `${supplier.name} has been added successfully.` });
   };
@@ -256,17 +257,17 @@ export default function Suppliers() {
         </div>
       ),
     },
-    {
-      key: "rating",
-      header: "Rating",
-      render: (item: Supplier) => (
-        <div className="flex items-center gap-1">
-          <Star className="w-4 h-4 fill-warning text-warning" />
-          <span className="font-medium">{item.rating}</span>
-        </div>
-      ),
-    },
-    { key: "totalSpend", header: "Total Spend", className: "text-right font-medium" },
+    // {
+    //   key: "rating",
+    //   header: "Rating",
+    //   render: (item: Supplier) => (
+    //     <div className="flex items-center gap-1">
+    //       <Star className="w-4 h-4 fill-warning text-warning" />
+    //       <span className="font-medium">{item.rating}</span>
+    //     </div>
+    //   ),
+    // },
+    // { key: "totalSpend", header: "Total Spend", className: "text-right font-medium" },
     {
       key: "status",
       header: "Status",
@@ -319,21 +320,53 @@ export default function Suppliers() {
                 <Label>Company Name *</Label>
                 <Input placeholder="Enter company name" value={newSupplier.name} onChange={(e) => setNewSupplier(prev => ({ ...prev, name: e.target.value }))} />
               </div>
-              <div className="space-y-2">
-                <Label>Category *</Label>
-                <Select value={newSupplier.category} onValueChange={(v) => setNewSupplier(prev => ({ ...prev, category: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Fuel">Fuel</SelectItem>
-                    <SelectItem value="Oil">Oil</SelectItem>
-                    <SelectItem value="Lubricants">Lubricants</SelectItem>
-                    <SelectItem value="Safety Equipment">Safety Equipment</SelectItem>
-                    <SelectItem value="Stationary">Stationary</SelectItem>
-                    <SelectItem value="Spare Parts">Spare Parts</SelectItem>
-                    <SelectItem value="Equipment">Equipment</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+<div className="space-y-2">
+  <Label>Categories *</Label>
+
+  <Select
+    onValueChange={(value) => {
+      setNewSupplier((prev) => ({
+        ...prev,
+        categories: prev.categories.includes(value)
+          ? prev.categories
+          : [...prev.categories, value],
+      }));
+    }}
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select categories" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="Fuel">Fuel</SelectItem>
+      <SelectItem value="Oil">Oil</SelectItem>
+      <SelectItem value="Lubricants">Lubricants</SelectItem>
+      <SelectItem value="Safety Equipment">Safety Equipment</SelectItem>
+      <SelectItem value="Stationary">Stationary</SelectItem>
+      <SelectItem value="Spare Parts">Spare Parts</SelectItem>
+    </SelectContent>
+  </Select>
+
+  {/* ✅ Show selected categories */}
+  <div className="flex flex-wrap gap-2 mt-2">
+    {newSupplier.categories.map((cat) => (
+      <span
+        key={cat}
+        className="bg-primary/10 text-primary px-2 py-1 rounded text-xs flex items-center gap-1"
+      >
+        {cat}
+        <X
+          className="w-3 h-3 cursor-pointer"
+          onClick={() =>
+            setNewSupplier((prev) => ({
+              ...prev,
+              categories: prev.categories.filter((c) => c !== cat),
+            }))
+          }
+        />
+      </span>
+    ))}
+  </div>
+</div>
               <div className="space-y-2">
                 <Label>Contact Person</Label>
                 <Input placeholder="Enter contact name" value={newSupplier.contactPerson} onChange={(e) => setNewSupplier(prev => ({ ...prev, contactPerson: e.target.value }))} />
@@ -358,7 +391,7 @@ export default function Suppliers() {
                 <Label>Tax Registration Number (NTN)</Label>
                 <Input placeholder="Enter NTN" value={newSupplier.taxNumber} onChange={(e) => setNewSupplier(prev => ({ ...prev, taxNumber: e.target.value }))} />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Payment Terms</Label>
                 <Select value={newSupplier.paymentTerms} onValueChange={(v) => setNewSupplier(prev => ({ ...prev, paymentTerms: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select terms" /></SelectTrigger>
@@ -369,7 +402,7 @@ export default function Suppliers() {
                     <SelectItem value="Advance">Advance Payment</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>

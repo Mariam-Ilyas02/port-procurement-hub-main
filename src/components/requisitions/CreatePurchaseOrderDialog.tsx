@@ -428,7 +428,7 @@ export function CreatePurchaseOrderDialog({
 
           {/* Payment & Delivery */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            {/* <div>
               <Label>Payment Terms</Label>
               <Select onValueChange={setPaymentTerms}>
                 <SelectTrigger>
@@ -440,7 +440,7 @@ export function CreatePurchaseOrderDialog({
                   <SelectItem value="advance">Advance</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             <div>
               <Label>Delivery Date</Label>

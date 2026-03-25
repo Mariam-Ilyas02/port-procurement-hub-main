@@ -359,12 +359,12 @@ const categories = [
   { name: "Equipment",   subcategories: ["Workshop Tools", "IT Equipment", "Office Equipment"] },
 ];
 
-const paymentTermsOptions = [
-  "Net 30",
-  "Net 60",
-  "Immediate",
-  "50% Advance / 50% on Delivery",
-];
+// const paymentTermsOptions = [
+//   "Net 30",
+//   "Net 60",
+//   "Immediate",
+//   "50% Advance / 50% on Delivery",
+// ];
 
 const departments = ["Operations", "Workshop", "Admin", "Finance", "Procurement"];
 const units       = ["Pcs", "L", "Kg", "Box", "Set", "Pairs"];
@@ -783,13 +783,7 @@ function ManualPODialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Payment terms</Label>
-              <Select onValueChange={setPaymentTerms} value={paymentTerms}>
-                <SelectTrigger><SelectValue placeholder="Select terms" /></SelectTrigger>
-                <SelectContent>
-                  {paymentTermsOptions.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
+
             </div>
           </div>
 

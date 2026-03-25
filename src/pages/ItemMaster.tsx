@@ -33,7 +33,10 @@ interface Item {
   isFuel: boolean;
   status: "active" | "inactive";
 }
-
+const stockData = {
+  DIESEL: 4500,
+  "ENG-OIL": 150
+};
 const initialItems: Item[] = [
   {
     id: "1",
@@ -63,20 +66,56 @@ export default function ItemMaster() {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const columns = [
-    { key: "itemCode", header: "Item Code" },
-    { key: "itemName", header: "Item Name" },
-    { key: "category", header: "Category" },
-    { key: "unit", header: "Unit" },
-    { key: "taxType", header: "Tax Type" },
-    { key: "reorderLevel", header: "Reorder Level" },
-    {
-      key: "isFuel",
-      header: "Fuel",
-      render: (item: Item) => (item.isFuel ? "Yes" : "No"),
+const columns = [
+  { key: "itemCode", header: "Item Code" },
+  { key: "itemName", header: "Item Name" },
+  { key: "category", header: "Category" },
+  { key: "unit", header: "Unit" },
+  { key: "taxType", header: "Tax Type" },
+
+  // ✅ NEW: Current Stock column
+  {
+    key: "stock",
+    header: "Stock",
+    render: (item: Item) => {
+      return stockData[item.itemCode] || 0;
     },
-    { key: "status", header: "Status" },
-  ];
+  },
+
+  // ✅ Reorder Level (clean display)
+  {
+    key: "reorderLevel",
+    header: "Reorder Level",
+  },
+
+  // ✅ NEW: Status column
+  {
+    key: "stockStatus",
+    header: "Status",
+    render: (item: Item) => {
+      const currentStock = stockData[item.itemCode] || 0;
+      const isLow = currentStock <= item.reorderLevel;
+
+      return isLow ? (
+        <span className="text-red-500 font-semibold">
+          ⚠ Low Stock
+        </span>
+      ) : (
+        <span className="text-green-600 font-medium">
+          ✔ Normal
+        </span>
+      );
+    },
+  },
+
+  {
+    key: "isFuel",
+    header: "Fuel",
+    render: (item: Item) => (item.isFuel ? "Yes" : "No"),
+  },
+
+  { key: "status", header: "Status" },
+];
 
   const filtered = initialItems.filter(
     (item) =>

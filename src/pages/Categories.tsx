@@ -31,7 +31,7 @@ const initialCategories: Category[] = [
     code: "FUEL",
     defaultUnit: "L",
     accountingCode: "ACC-101",
-    budgetLimit: 50000,
+    // budgetLimit: 50000,
     status: "Active",
   },
   
@@ -40,7 +40,7 @@ const initialCategories: Category[] = [
     name: "Oil",
     code: "OIL",
     defaultUnit: "L",
-    budgetLimit: 15000,
+    // budgetLimit: 15000,
     status: "Active",
   },
   {
@@ -48,7 +48,7 @@ const initialCategories: Category[] = [
     name: "Lubricants",
     code: "LUB",
     defaultUnit: "KG",
-    budgetLimit: 8000,
+    // budgetLimit: 8000,
     status: "Active",
   },
   {
@@ -74,7 +74,7 @@ export default function Categories() {
   return (
     <AppLayout
       title="Category Setup"
-      subtitle="Manage inventory categories and budget configuration"
+      subtitle="Manage inventory categories and their details"
       actions={
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
@@ -105,10 +105,10 @@ export default function Categories() {
                 <Input placeholder="L / KG / Pcs" />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Annual Budget Limit (₨)</Label>
                 <Input type="number" placeholder="Enter budget (optional)" />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label>Accounting Code (Optional)</Label>
@@ -138,7 +138,7 @@ export default function Categories() {
               <div>Name</div>
               <div>Code</div>
               <div>Unit</div>
-              <div>Budget</div>
+              {/* <div>Budget</div> */}
               <div>Status</div>
               <div>Actions</div>
             </div>
@@ -153,7 +153,7 @@ export default function Categories() {
                 <div>{cat.code}</div>
                 <div>{cat.defaultUnit}</div>
 
-                <div>
+                {/* <div>
                   {cat.budgetLimit ? (
                     <span className="text-primary font-medium">
                       ₨{cat.budgetLimit.toLocaleString()}
@@ -161,7 +161,7 @@ export default function Categories() {
                   ) : (
                     <span className="text-muted-foreground">Not Set</span>
                   )}
-                </div>
+                </div> */}
 
                 <div>
                   <span

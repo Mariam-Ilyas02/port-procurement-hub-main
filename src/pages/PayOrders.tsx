@@ -358,14 +358,14 @@ function DetailDialog({
             <p className="text-xs text-muted-foreground mb-0.5">Supplier</p>
             <p className="font-medium">{order.supplier}</p>
           </div>
-          <div>
+          {/* <div>
             <p className="text-xs text-muted-foreground mb-0.5">Invoice number</p>
             <p className="font-medium">{order.invoiceNumber}</p>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <p className="text-xs text-muted-foreground mb-0.5">Invoice date</p>
             <p className="font-medium">{order.invoiceDate}</p>
-          </div>
+          </div> */}
           <div>
             <p className="text-xs text-muted-foreground mb-0.5">Due date</p>
             <p className="font-medium">{order.dueDate}</p>
@@ -591,7 +591,7 @@ function CreateDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Invoice number</Label>
               <Input
@@ -608,7 +608,7 @@ function CreateDialog({
                 onChange={(e) => setInvoiceDate(e.target.value)}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -666,11 +666,11 @@ function CreateDialog({
                 [
                   { key: "po" as const, label: "PO", ref: poRef },
                   { key: "grn" as const, label: "GRN", ref: grnRef },
-                  {
-                    key: "invoice" as const,
-                    label: "Invoice",
-                    ref: invoiceNumber,
-                  },
+                  // {
+                  //   key: "invoice" as const,
+                  //   label: "Invoice",
+                  //   ref: invoiceNumber,
+                  // },
                 ]
               ).map(({ key, label, ref }) => (
                 <div
@@ -1023,7 +1023,7 @@ export default function PayOrders() {
     { key: "poReference", header: "PO ref" },
     { key: "grnReference", header: "GRN ref" },
     { key: "supplier", header: "Supplier" },
-    { key: "invoiceNumber", header: "Invoice #" },
+    // { key: "invoiceNumber", header: "Invoice #" },
     {
       key: "amount",
       header: "Amount",

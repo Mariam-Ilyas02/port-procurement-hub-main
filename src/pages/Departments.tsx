@@ -33,7 +33,7 @@ export default function Departments() {
 
   const columns = [
     { key: "name", header: "Department Name" },
-    { key: "budget", header: "Budget" },
+    // { key: "budget", header: "Budget" },
     { key: "status", header: "Status" },
   ];
 
@@ -60,10 +60,10 @@ export default function Departments() {
                 <Input placeholder="Enter name" />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Annual Budget (₨)</Label>
                 <Input type="number" placeholder="0.00" />
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>

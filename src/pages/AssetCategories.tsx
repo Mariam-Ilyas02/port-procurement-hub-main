@@ -52,8 +52,8 @@ export default function AssetCategories() {
   const columns = [
     { key: "name", header: "Category Name" },
     { key: "description", header: "Description" },
-    { key: "depreciationRate", header: "Depreciation (%)" },
-    { key: "usefulLife", header: "Useful Life (Years)" },
+    // { key: "depreciationRate", header: "Depreciation (%)" },
+    // { key: "usefulLife", header: "Useful Life (Years)" },
   ];
 
   const handleSave = () => {
@@ -112,7 +112,7 @@ export default function AssetCategories() {
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Depreciation Rate (%)</Label>
                 <Input
                   type="number"
@@ -124,9 +124,9 @@ export default function AssetCategories() {
                     })
                   }
                 />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Useful Life (Years)</Label>
                 <Input
                   type="number"
@@ -138,7 +138,7 @@ export default function AssetCategories() {
                     })
                   }
                 />
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter>
