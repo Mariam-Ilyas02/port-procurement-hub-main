@@ -374,10 +374,10 @@ function DetailDialog({
             <p className="text-xs text-muted-foreground mb-0.5">Amount</p>
             <p className="text-xl font-semibold">{fmt(order.amount)}</p>
           </div>
-          <div>
+          {/* <div>
             <p className="text-xs text-muted-foreground mb-0.5">Payment type</p>
             <p className="font-medium">{paymentTypeLabel[order.paymentType]}</p>
-          </div>
+          </div> */}
           <div>
             <p className="text-xs text-muted-foreground mb-0.5">Approval level</p>
             <p className="font-medium">
@@ -629,7 +629,7 @@ function CreateDialog({
                 </p>
               )}
             </div>
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <Label>Payment type</Label>
               <Select
                 onValueChange={(v) => setPaymentType(v as PaymentType)}
@@ -644,7 +644,7 @@ function CreateDialog({
                   <SelectItem value="advance">Advance payment</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-1.5">
