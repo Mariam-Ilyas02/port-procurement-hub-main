@@ -101,7 +101,7 @@ export default function PaymentModes() {
     { key: "code", header: "Code" },
     { key: "name", header: "Payment Mode" },
     { key: "description", header: "Description" },
-    { key: "accountCode", header: "Account Code" },
+    // { key: "accountCode", header: "Account Code" },
     {
       key: "requiresReference",
       header: "Ref Required",
@@ -170,10 +170,10 @@ export default function PaymentModes() {
                     <Input placeholder="Enter description" />
                   </div>
 
-                  <div>
+                  {/* <div>
                     <Label>Account Code</Label>
                     <Input placeholder="Enter GL account code" />
-                  </div>
+                  </div> */}
 
                   <div className="flex items-center gap-2">
                     <input type="checkbox" />
