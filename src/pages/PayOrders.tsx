@@ -64,7 +64,7 @@ interface PayOrder {
   paymentType: PaymentType;
   dueDate: string;
   status: PayOrderStatus;
-  threeWayMatch: ThreeWayMatch;
+  // threeWayMatch: ThreeWayMatch;
   approvalLevel: ApprovalLevel;
   financeApproved: boolean;
   daysOutstanding: number;
@@ -95,7 +95,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "full",
     dueDate: "2025-02-15",
     status: "pending",
-    threeWayMatch: { po: true, grn: true, invoice: true },
+    // threeWayMatch: { po: true, grn: true, invoice: true },
     approvalLevel: "L2",
     financeApproved: false,
     daysOutstanding: 30,
@@ -112,7 +112,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "full",
     dueDate: "2025-02-10",
     status: "approved",
-    threeWayMatch: { po: true, grn: true, invoice: true },
+    // threeWayMatch: { po: true, grn: true, invoice: true },
     approvalLevel: "L1",
     financeApproved: true,
     daysOutstanding: 35,
@@ -129,7 +129,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "partial",
     dueDate: "2025-01-20",
     status: "paid",
-    threeWayMatch: { po: true, grn: true, invoice: true },
+    // threeWayMatch: { po: true, grn: true, invoice: true },
     approvalLevel: "L1",
     financeApproved: true,
     daysOutstanding: 0,
@@ -146,7 +146,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "partial",
     dueDate: "2025-03-05",
     status: "draft",
-    threeWayMatch: { po: true, grn: false, invoice: false },
+    // threeWayMatch: { po: true, grn: false, invoice: false },
     approvalLevel: "L1",
     financeApproved: false,
     daysOutstanding: 0,
@@ -163,7 +163,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "full",
     dueDate: "2025-02-25",
     status: "approved",
-    threeWayMatch: { po: true, grn: true, invoice: true },
+    // threeWayMatch: { po: true, grn: true, invoice: true },
     approvalLevel: "L2",
     financeApproved: true,
     daysOutstanding: 20,
@@ -180,7 +180,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "full",
     dueDate: "2025-01-10",
     status: "pending",
-    threeWayMatch: { po: true, grn: true, invoice: true },
+    // threeWayMatch: { po: true, grn: true, invoice: true },
     approvalLevel: "L3",
     financeApproved: false,
     daysOutstanding: 65,
@@ -197,7 +197,7 @@ const initialPayOrders: PayOrder[] = [
     paymentType: "advance",
     dueDate: "2025-02-28",
     status: "draft",
-    threeWayMatch: { po: true, grn: false, invoice: false },
+    // threeWayMatch: { po: true, grn: false, invoice: false },
     approvalLevel: "L1",
     financeApproved: false,
     daysOutstanding: 0,
@@ -318,7 +318,7 @@ function DetailDialog({
   onSubmit: () => void;
   onClose: () => void;
 }) {
-  const matched = isFullMatch(order.threeWayMatch);
+  // const matched = isFullMatch(order.threeWayMatch);
 
   return (
     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -334,7 +334,7 @@ function DetailDialog({
         <StatusFlow current={order.status} />
 
         {/* Warning if unmatched */}
-        {!matched && (
+        {/* {!matched && (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
             <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>
@@ -342,7 +342,7 @@ function DetailDialog({
               Pay order cannot be approved until all three documents match.
             </span>
           </div>
-        )}
+        )} */}
 
         {/* Details grid */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -394,45 +394,7 @@ function DetailDialog({
         </div>
 
         {/* 3-way match */}
-        <div>
-          <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
-            <FileCheck className="w-4 h-4" /> 3-way match verification
-          </p>
-          <div className="grid grid-cols-3 gap-3">
-            {(
-              [
-                { key: "po", label: "Purchase Order" },
-                { key: "grn", label: "GRN Receipt" },
-                { key: "invoice", label: "Invoice" },
-              ] as { key: keyof ThreeWayMatch; label: string }[]
-            ).map(({ key, label }) => (
-              <div
-                key={key}
-                className={`flex flex-col items-center gap-1 p-3 rounded-lg border text-center ${
-                  order.threeWayMatch[key]
-                    ? "border-success/30 bg-success/5"
-                    : "border-destructive/30 bg-destructive/5"
-                }`}
-              >
-                {order.threeWayMatch[key] ? (
-                  <CheckCircle className="w-5 h-5 text-success" />
-                ) : (
-                  <Clock className="w-5 h-5 text-warning" />
-                )}
-                <p className="text-xs font-medium">{label}</p>
-                <p
-                  className={`text-xs ${
-                    order.threeWayMatch[key]
-                      ? "text-success"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {order.threeWayMatch[key] ? "Verified" : "Pending"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {order.notes && (
           <div>
@@ -456,7 +418,7 @@ function DetailDialog({
             Submit for approval
           </Button>
         )}
-        {order.status === "pending" && matched && (
+        {/* {order.status === "pending" && matched && (
           <Button
             className="bg-success hover:bg-success/90 text-white"
             onClick={() => {
@@ -466,7 +428,7 @@ function DetailDialog({
           >
             <CheckCircle className="w-4 h-4 mr-1" /> Approve
           </Button>
-        )}
+        )} */}
         {order.status === "approved" && (
           <Button
             onClick={() => {
@@ -529,7 +491,7 @@ function CreateDialog({
       paymentType,
       dueDate: dueDate || new Date().toISOString().split("T")[0],
       status: asDraft ? "draft" : "pending",
-      threeWayMatch: autoMatch,
+      // threeWayMatch: autoMatch,
       approvalLevel: getApprovalLevel(amt),
       financeApproved: false,
       daysOutstanding: 0,
@@ -547,10 +509,10 @@ function CreateDialog({
         </DialogHeader>
 
         <div className="grid gap-4 py-2">
-          <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+          {/* <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
             System will auto-generate the pay order after 3-way match (PO + GRN
             + Invoice) is verified. You may also create manually.
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -659,7 +621,7 @@ function CreateDialog({
           {/* Live 3-way match preview */}
           <div className="p-4 bg-muted/50 rounded-lg space-y-3">
             <p className="text-sm font-medium flex items-center gap-1.5">
-              <FileCheck className="w-4 h-4" /> 3-way match verification
+              {/* <FileCheck className="w-4 h-4" /> 3-way match verification */}
             </p>
             <div className="grid grid-cols-3 gap-3">
               {(
@@ -696,7 +658,7 @@ function CreateDialog({
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Finance confirmation required after all three documents are matched.
+              Finance confirmation required.
             </p>
           </div>
 
@@ -968,7 +930,7 @@ export default function PayOrders() {
   );
   const approved = orders.filter((o) => o.status === "approved");
   const overdue = outstanding.filter((o) => o.daysOutstanding > 30);
-  const unmatched = orders.filter((o) => !isFullMatch(o.threeWayMatch));
+  // const unmatched = orders.filter((o) => !isFullMatch(o.threeWayMatch));
 
   const metrics = [
     {
@@ -1001,7 +963,7 @@ export default function PayOrders() {
     },
     {
       label: "Unmatched",
-      value: unmatched.length,
+      // value: unmatched.length,
       sub: "3-way match fail",
       icon: <FileCheck className="w-5 h-5 text-destructive" />,
       accent: "bg-destructive/10",
@@ -1040,11 +1002,11 @@ export default function PayOrders() {
         </span>
       ),
     },
-    {
-      key: "threeWayMatch",
-      header: "3-way match",
-      render: (item: PayOrder) => <MatchBadge match={item.threeWayMatch} />,
-    },
+    // {
+    //   key: "threeWayMatch",
+    //   header: "3-way match",
+    //   render: (item: PayOrder) => <MatchBadge match={item.threeWayMatch} />,
+    // },
     {
       key: "dueDate",
       header: "Due date",
@@ -1092,7 +1054,7 @@ export default function PayOrders() {
               Submit
             </Button>
           )}
-          {item.status === "pending" && isFullMatch(item.threeWayMatch) && (
+          {/* {item.status === "pending" && isFullMatch(item.threeWayMatch) && (
             <Button
               variant="ghost"
               size="icon"
@@ -1101,7 +1063,7 @@ export default function PayOrders() {
             >
               <CheckCircle className="w-4 h-4" />
             </Button>
-          )}
+          )} */}
           {item.status === "approved" && (
             <Button
               variant="ghost"
@@ -1123,7 +1085,7 @@ export default function PayOrders() {
   return (
     <AppLayout
       title="Pay orders"
-      subtitle="3-way match verification (PO · GRN · Invoice) · Approval workflow · Payment tracking"
+      // subtitle="3-way match verification (PO · GRN · Invoice) · Approval workflow · Payment tracking"
       actions={
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
