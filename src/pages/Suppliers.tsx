@@ -55,7 +55,7 @@ interface Supplier {
   phone: string;
   address: string;
   taxNumber: string;
-  paymentTerms: string;
+  // paymentTerms: string;
   rating: number;
   totalOrders: number;
   totalSpend: string;
@@ -69,7 +69,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Ahmed Hassan", designation: "Sales Manager", 
     email: "ahmed@gulfpetro.com", phone: "+92-300-123-4567", 
     address: "Plot 12, Industrial Area, Karachi", taxNumber: "TRN-12345678",
-    paymentTerms: "Net 30", rating: 4.8, totalOrders: 45, totalSpend: "₨12,500,000", 
+    rating: 4.8, totalOrders: 45, totalSpend: "₨12,500,000", 
     status: "active",
     items: [
       { id: "i1", name: "Diesel Fuel", category: "Fuel", unit: "L" },
@@ -82,7 +82,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Sarah", designation: "Account Manager",
     email: "sarah@shell.com", phone: "+92-321-234-5678", 
     address: "Shell House, Clifton, Karachi", taxNumber: "TRN-23456789",
-    paymentTerms: "Net 60", rating: 4.5, totalOrders: 32, totalSpend: "₨4,500,000", 
+    rating: 4.5, totalOrders: 32, totalSpend: "₨4,500,000", 
     status: "active",
     items: [
       { id: "i4", name: "Engine Oil SAE 40", category: "Oil", unit: "L" },
@@ -94,7 +94,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Paras Mubeen", designation: "Regional Head",
     email: "paras@total.com", phone: "+92-333-345-6789",
     address: "Total Tower, I.I. Chundrigar Rd, Karachi", taxNumber: "TRN-34567890",
-    paymentTerms: "Net 30", rating: 4.7, totalOrders: 28, totalSpend: "₨8,900,000", 
+    rating: 4.7, totalOrders: 28, totalSpend: "₨8,900,000", 
     status: "active",
     items: [
       { id: "i6", name: "Diesel Fuel", category: "Fuel", unit: "L" },
@@ -106,7 +106,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Jaleel Khan", designation: "Director",
     email: "jaleel@safetyfirst.com", phone: "+92-345-456-7890",
     address: "SITE Area, Karachi", taxNumber: "TRN-45678901",
-    paymentTerms: "COD", rating: 4.2, totalOrders: 15, totalSpend: "₨1,250,000", 
+    rating: 4.2, totalOrders: 15, totalSpend: "₨1,250,000", 
     status: "active",
     items: [
       { id: "i8", name: "Safety Helmets", category: "Safety Equipment", unit: "Pcs" },
@@ -119,7 +119,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Laiba Moin", designation: "Sales Rep",
     email: "laiba@officedepot.com", phone: "+92-312-567-8901",
     address: "Saddar, Karachi", taxNumber: "TRN-56789012",
-    paymentTerms: "Net 30", rating: 4.0, totalOrders: 22, totalSpend: "₨450,000", 
+    rating: 4.0, totalOrders: 22, totalSpend: "₨450,000", 
     status: "active",
     items: [
       { id: "i11", name: "Printer Cartridges", category: "Stationary", unit: "Pcs" },
@@ -131,7 +131,7 @@ const initialSuppliersData: Supplier[] = [
     contactPerson: "Mikaal", designation: "Territory Manager",
     email: "mikaal@castrol.com", phone: "+92-322-678-9012",
     address: "Korangi Industrial Area, Karachi", taxNumber: "TRN-67890123",
-    paymentTerms: "Net 60", rating: 4.6, totalOrders: 18, totalSpend: "₨1,800,000", 
+    rating: 4.6, totalOrders: 18, totalSpend: "₨1,800,000", 
     status: "inactive",
     items: [
       { id: "i13", name: "Engine Oil", category: "Lubricants", unit: "L" },
@@ -257,6 +257,15 @@ const supplier: Supplier = {
         </div>
       ),
     },
+    {
+  key: "taxNumber",
+  header: "NTN",
+  render: (item: Supplier) => (
+    <span className="font-mono text-sm text-muted-foreground">
+      {item.taxNumber}
+    </span>
+  ),
+},
     // {
     //   key: "rating",
     //   header: "Rating",
@@ -475,10 +484,10 @@ const supplier: Supplier = {
                     <Label className="text-muted-foreground text-xs">NTN</Label>
                     <p>{selectedSupplier.taxNumber}</p>
                   </div>
-                  <div className="space-y-1">
+                  {/* <div className="space-y-1">
                     <Label className="text-muted-foreground text-xs">Payment Terms</Label>
                     <p>{selectedSupplier.paymentTerms}</p>
-                  </div>
+                  </div> */}
                   <div className="space-y-1">
                     <Label className="text-muted-foreground text-xs">Total Orders</Label>
                     <p className="font-medium">{selectedSupplier.totalOrders}</p>
@@ -730,7 +739,7 @@ const supplier: Supplier = {
                   <Input defaultValue={selectedSupplier.email} onChange={(e) => setSelectedSupplier(prev => prev ? { ...prev, email: e.target.value } : null)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Payment Terms</Label>
+                  {/* <Label>Payment Terms</Label>
                   <Select defaultValue={selectedSupplier.paymentTerms} onValueChange={(v) => setSelectedSupplier(prev => prev ? { ...prev, paymentTerms: v } : null)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -739,7 +748,7 @@ const supplier: Supplier = {
                       <SelectItem value="COD">Cash on Delivery</SelectItem>
                       <SelectItem value="Advance">Advance Payment</SelectItem>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                 </div>
               </div>
               <DialogFooter>
